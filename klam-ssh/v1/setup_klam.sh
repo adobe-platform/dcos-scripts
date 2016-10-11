@@ -222,3 +222,5 @@ echo "Restarting SSHD"
 systemctl restart sshd.service
 
 echo "-------Done klam-ssh setup-------"
+
+sleep infinity
