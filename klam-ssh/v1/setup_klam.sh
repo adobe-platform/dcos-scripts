@@ -150,7 +150,7 @@ ls -l /opt/klam/lib64/libnss_ato.so*
 
 # Create the klamfed home directory
 echo "Creating the klamfed user and home directory"
-sudo useradd -p "*" -U -G sudo -u 5000 -m klamfed -s /bin/bash
+sudo useradd -p "*" -U -G sudo -u 5000 -m klamfed -s /bin/bash || :
 mkdir -p /home/klamfed
 sudo usermod -p "*" klamfed
 sudo usermod -U klamfed
@@ -166,7 +166,7 @@ sudo usermod -a -G sudo klamfed
 
 # Add passwordless sudo to klamfed
 echo "Adding passwordless sudo for klamfed"
-sudo echo "klamfed ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/klamfed
+sudo echo "klamfed ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/klamfed
 
 # Validate that the klamfed user has the correct uid value (5000) and home directory
 echo "Validating the klamfed user uid and home directory"
