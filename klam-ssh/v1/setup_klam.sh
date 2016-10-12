@@ -129,7 +129,7 @@ EOT
 # steps copy it from the klam-ssh container via a volume mount, then
 # remove the container
 echo "Creating docker klam-ssh"
-docker create --name klam-ssh "${IMAGE}"
+docker --config=$DIR/.docker/ create --name klam-ssh "${IMAGE}"
 echo "Copying /tmp/klam-build/coreos/libnss_ato.so.2 file to /opt/klam/lib64"
 docker cp klam-ssh:/tmp/klam-build/coreos/libnss_ato.so.2 /opt/klam/lib64
 ln -sf /opt/klam/lib64/libnss_ato.so.2 /opt/klam/lib64/libnss_ato.so
