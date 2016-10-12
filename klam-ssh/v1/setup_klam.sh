@@ -76,7 +76,7 @@ echo "Using key location: $KEY_LOCATION with prefix: $KEY_LOCATION_PREFIX"
 
 # create nsswitch.conf
 echo "Creating /home/core/nsswitch.conf..."
-cat << EOT >> /home/core/nsswitch.conf
+cat << EOT > /home/core/nsswitch.conf
 passwd:     files usrfiles ato
 shadow:     files usrfiles ato
 group:      files usrfiles ato
@@ -98,7 +98,7 @@ EOT
 
 # create klam-ssh.conf
 echo "Creating /home/core/klam-ssh.conf..."
-cat << EOT >> /home/core/klam-ssh.conf
+cat << EOT > /home/core/klam-ssh.conf
 {
     key_location: ${KEY_LOCATION_PREFIX:-adobe-cloudops-ssh-users}${KEY_LOCATION},
     role_name: ${ROLE_NAME},
@@ -116,7 +116,7 @@ mkdir -p /opt/klam/lib /opt/klam/lib64 /etc/ld.so.conf.d
 
 # Creating environment file of KLAM values
 echo "Creating environment file of KLAM values"
-cat << EOT >> /opt/klam/environment
+cat << EOT > /opt/klam/environment
 REGION=${REGION}
 ROLE_NAME=${ROLE_NAME}
 ENCRYPTION_ID=${ENCRYPTION_ID}
@@ -141,8 +141,8 @@ docker rm klam-ssh
 echo "Moving the ld.so.conf file to the correct location"
 echo "/opt/klam/lib64" > /etc/ld.so.conf.d/klam.conf
 echo "Updating shared library cache"
-ldconfig
-ldconfig -p | grep klam
+sudo ldconfig
+sudo ldconfig -p | grep klam
 
 # Validate that the files exist in the correct folder
 echo "Validating the /opt/klam/lib64/libnss_ato.so* file exists in the correct folder"
@@ -150,23 +150,23 @@ ls -l /opt/klam/lib64/libnss_ato.so*
 
 # Create the klamfed home directory
 echo "Creating the klamfed user and home directory"
-useradd -p "*" -U -G sudo -u 5000 -m klamfed -s /bin/bash
+sudo useradd -p "*" -U -G sudo -u 5000 -m klamfed -s /bin/bash
 mkdir -p /home/klamfed
-usermod -p "*" klamfed
-usermod -U klamfed
-update-ssh-keys -u klamfed || :
+sudo usermod -p "*" klamfed
+sudo usermod -U klamfed
+sudo update-ssh-keys -u klamfed || :
 
 # Add klamfed to wheel
 echo "Adding klamfed to wheel group"
-usermod -a -G wheel klamfed
+sudo usermod -a -G wheel klamfed
 
 # Add klamfed to sudo
 echo "Adding klamfed to sudo group"
-usermod -a -G sudo klamfed
+sudo usermod -a -G sudo klamfed
 
 # Add passwordless sudo to klamfed
 echo "Adding passwordless sudo for klamfed"
-echo "klamfed ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/klamfed
+sudo echo "klamfed ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/klamfed
 
 # Validate that the klamfed user has the correct uid value (5000) and home directory
 echo "Validating the klamfed user uid and home directory"
@@ -175,12 +175,12 @@ ls -ld /home/klamfed
 
 # Re-link nsswitch.conf
 echo "Re-linking nsswitch.conf"
-mv -f /home/core/nsswitch.conf /etc/nsswitch.conf
+sudo mv -f /home/core/nsswitch.conf /etc/nsswitch.conf
 cat /etc/nsswitch.conf
 
 # generate the ATO config
 echo "Generating the ATO config"
-grep klamfed /etc/passwd > /opt/klam/lib/klam-ato.conf
+sudo grep klamfed /etc/passwd > /opt/klam/lib/klam-ato.conf
 
 # Validate that the contents of /opt/klam/lib/klam-ato.conf
 echo "Validating the contents of /opt/klam/lib/klam-ato.conf"
@@ -188,22 +188,22 @@ cat /opt/klam/lib/klam-ato.conf
 
 # Move klam-ssh.conf
 echo "Moving klam-ssh.conf"
-mv -f /home/core/klam-ssh.conf /opt/klam/lib/klam-ssh.conf
+sudo mv -f /home/core/klam-ssh.conf /opt/klam/lib/klam-ssh.conf
 cat /opt/klam/lib/klam-ssh.conf
 
 #  update /etc/ssh/sshd_config if necessary
 echo "Updating /etc/ssh/sshd_config if necessary"
 if ! grep /opt/klam/lib/authorizedkeys_command.sh /etc/ssh/sshd_config; then
-  cp /etc/ssh/sshd_config sshd_config
+  sudo cp /etc/ssh/sshd_config sshd_config
   echo -e '\nAuthorizedKeysCommand /opt/klam/lib/authorizedkeys_command.sh' >> sshd_config
   echo 'AuthorizedKeysCommandUser root' >> sshd_config
-  mv -f sshd_config /etc/ssh/sshd_config
+  sudo mv -f sshd_config /etc/ssh/sshd_config
 fi
 cat /etc/ssh/sshd_config
 
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root"
-chown root:root $DIR/authorizedkeys_command.sh
+sudo chown root:root $DIR/authorizedkeys_command.sh
 
 # Relocate authorizedkeys_command
 echo "Relocating authorizedkeys_command to /opt/klam/lib"
@@ -219,7 +219,7 @@ mv $DIR/download_s3.sh /opt/klam/lib
 
 # Restart SSHD
 echo "Restarting SSHD"
-systemctl restart sshd.service
+sudo systemctl restart sshd.service
 
 echo "-------Done klam-ssh setup-------"
 
