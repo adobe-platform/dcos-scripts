@@ -16,5 +16,16 @@ export INTERFACE="docker0"
 
 sudo iptables -t nat -I PREROUTING -p tcp -d 169.254.169.254 --dport 80 -j DNAT --to-destination "$GATEWAY":8080 -i "$INTERFACE"
 
+if [[ $? -eq 0 ]]; then
+	echo $(date -u) "IPTABLES rule created. Sleeping..."
+	sleep infinity
+else
+	while [ $? != 0 ]; do
+		sleep 5;
+		echo $(date -u) "IPTABLES rule creation failed. Retrying..."
+		sudo iptables -t nat -I PREROUTING -p tcp -d 169.254.169.254 --dport 80 -j DNAT --to-destination "$GATEWAY":8080 -i "$INTERFACE"
+	done
+fi
+
 echo $(date -u) "IPTABLES rule created. Sleeping..."
 sleep infinity
