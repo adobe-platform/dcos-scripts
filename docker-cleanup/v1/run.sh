@@ -66,6 +66,10 @@ if [ "${DEBUG}" == "0" ]; then
     unset DEBUG
 fi
 
+if [ "${CLEANUP_VOLUMES}" == "0" ]; then
+    unset CLEANUP_VOLUMES
+fi
+
 if [ $DEBUG ]; then echo DEBUG ENABLED; fi
 
 echo "=> Run the clean script every ${CLEAN_PERIOD} seconds and delay ${DELAY_TIME} seconds to clean."
@@ -77,16 +81,18 @@ do
     if [ $DEBUG ]; then echo DEBUG: Starting loop; fi
 
     # Cleanup unused volumes
-
-    if [[ $(docker version --format '{{(index .Server.Version)}}' | grep -E '^[01]\.[012345678]\.') ]]; then
-      echo "=> Removing unused volumes using 'docker-cleanup-volumes.sh' script"
-      /docker-cleanup-volumes.sh
-    else
-      echo "=> Removing unused volumes using native 'docker volume' command"
-      for volume in $(docker volume ls -qf dangling=true); do
-        echo "Deleting ${volume}"
-        docker volume rm "${volume}"
-      done
+    if [ $CLEANUP_VOLUMES ]; then
+      if [ $DEBUG ]; then echo DEBUG: Cleaning uo volumes; fi
+      if [[ $(docker version --format '{{(index .Server.Version)}}' | grep -E '^[01]\.[012345678]\.') ]]; then
+        echo "=> Removing unused volumes using 'docker-cleanup-volumes.sh' script"
+        /docker-cleanup-volumes.sh
+      else
+        echo "=> Removing unused volumes using native 'docker volume' command"
+        for volume in $(docker volume ls -qf dangling=true); do
+          echo "Deleting ${volume}"
+          docker volume rm "${volume}"
+        done
+      fi
     fi
 
     IFS='
