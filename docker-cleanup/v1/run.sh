@@ -30,13 +30,12 @@ else
     exit 1
 fi
 
-
-if [ "${CLEAN_PERIOD}" == "**None**" ]; then
+if [[ -z "${CLEAN_PERIOD}" ]]; then
     echo "=> CLEAN_PERIOD not defined, use the default value."
     CLEAN_PERIOD=1800
 fi
 
-if [ "${DELAY_TIME}" == "**None**" ]; then
+if [[ -z "${DELAY_TIME}" ]]; then
     echo "=> DELAY_TIME not defined, use the default value."
     DELAY_TIME=1800
 fi
