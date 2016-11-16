@@ -175,6 +175,10 @@ do
       mv ToBeCleanedImageIdList2 ToBeCleanedImageIdList
     fi
 
+    # Touch the health check file before any sleep commands
+    echo "=> Touching health check file"
+    touch healthcheck
+
     # Wait before cleaning containers and images
     echo "=> Waiting ${DELAY_TIME} seconds before cleaning"
     sleep ${DELAY_TIME} & wait
@@ -221,6 +225,10 @@ do
 
     # Run forever or exit after the first run depending on the value of $LOOP
     [ "${LOOP}" == "true" ] || break
+
+    # Touch the health check file at the end of a successful loop
+    echo "=> Touching health check file"
+    touch healthcheck
 
     echo "=> Next clean will be started in ${CLEAN_PERIOD} seconds"
     sleep ${CLEAN_PERIOD} & wait
