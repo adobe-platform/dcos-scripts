@@ -29,7 +29,7 @@ verbose=false
 
 function log_verbose() {
     if [ "${verbose}" = true ]; then
-        echo "$1"
+        echo "$1" >> stdout
     fi;
 }
 
@@ -37,37 +37,37 @@ function delete_volumes() {
   targetdir=$1
   echo
   if [[ ! -d ${targetdir} || ! "$(ls -A ${targetdir})" ]]; then
-        echo "Directory ${targetdir} does not exist or is empty, skipping."
+        echo "Directory ${targetdir} does not exist or is empty, skipping." >> stdout
         return
   fi
-  echo "Delete unused volume directories from $targetdir"
+  echo "Delete unused volume directories from $targetdir" >> stdout
   for dir in $(find ${targetdir} -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
   do
         dir=$(basename $dir)
         if [[ -d "${targetdir}/${dir}/_data" || "${dir}" =~ [0-9a-f]{64} ]]; then
                 if [ ${#allvolumes[@]} -gt 0 ] && [[ ${allvolumes[@]} =~ "${dir}" ]]; then
-                        echo "In use ${dir}"
+                        echo "In use ${dir}" >> stdout
                 else
                         if [ "${dryrun}" = false ]; then
-                                echo "Deleting ${dir}"
+                                echo "Deleting ${dir}" >> stdout
                                 rm -rf "${targetdir}/${dir}"
                         else
-                                echo "Would have deleted ${dir}"
+                                echo "Would have deleted ${dir}" >> stdout
                         fi
                 fi
         else
-                echo "Not a volume ${dir}"
+                echo "Not a volume ${dir}" >> stdout
         fi
   done
 }
 
 if [ $UID != 0 ]; then
-    echo "You need to be root to use this script."
+    echo "You need to be root to use this script." >> stderr
     exit 1
 fi
 
 if [ -z "$docker_bin" ] ; then
-    echo "Please install docker. You can install docker by running \"wget -qO- https://get.docker.io/ | sh\"."
+    echo "Please install docker. You can install docker by running \"wget -qO- https://get.docker.io/ | sh\"." >> stderr
     exit 1
 fi
 
@@ -83,10 +83,10 @@ do
             verbose=true
         ;;
         *)
-            echo "Cleanup docker volumes: remove unused volumes."
-            echo "Usage: ${0##*/} [--dry-run] [--verbose]"
-            echo "   -n, --dry-run: dry run: display what would get removed."
-            echo "   -v, --verbose: verbose output."
+            echo "Cleanup docker volumes: remove unused volumes." >> stderr
+            echo "Usage: ${0##*/} [--dry-run] [--verbose]" >> stderr
+            echo "   -n, --dry-run: dry run: display what would get removed." >> stderr
+            echo "   -v, --verbose: verbose output." >> stderr
             exit 1
         ;;
     esac
