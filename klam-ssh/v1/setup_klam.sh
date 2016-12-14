@@ -204,6 +204,7 @@ cat /etc/ssh/sshd_config
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root"
 sudo chown root:root $DIR/authorizedkeys_command.sh
+chmod +x $DIR/authorizedkeys_command.sh
 
 # Relocate authorizedkeys_command
 echo "Relocating authorizedkeys_command to /opt/klam/lib"
