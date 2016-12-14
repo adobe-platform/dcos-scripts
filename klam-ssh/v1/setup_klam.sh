@@ -212,7 +212,7 @@ mv $DIR/authorizedkeys_command.sh /opt/klam/lib
 # Change ownership of download_s3
 echo "Changing ownership of download_s3 to root:root"
 chown root:root $DIR/download_s3.sh
-chmod +x /opt/klam/lib/download_s3.sh
+chmod +x $DIR/download_s3.sh
 
 # Relocate download_s3.sh have to rename to downloadS3 as reference in python klam lib
 echo "Relocating download_s3 to /opt/klam/lib"
