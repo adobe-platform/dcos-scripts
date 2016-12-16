@@ -204,6 +204,7 @@ cat /etc/ssh/sshd_config
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root"
 sudo chown root:root $DIR/authorizedkeys_command.sh
+chmod +x $DIR/authorizedkeys_command.sh
 
 # Relocate authorizedkeys_command
 echo "Relocating authorizedkeys_command to /opt/klam/lib"
@@ -212,10 +213,11 @@ mv $DIR/authorizedkeys_command.sh /opt/klam/lib
 # Change ownership of download_s3
 echo "Changing ownership of download_s3 to root:root"
 chown root:root $DIR/download_s3.sh
+chmod +x $DIR/download_s3.sh
 
-# Relocate download_s3.sh
+# Relocate download_s3.sh have to rename to downloadS3 as reference in python klam lib
 echo "Relocating download_s3 to /opt/klam/lib"
-mv $DIR/download_s3.sh /opt/klam/lib
+mv $DIR/download_s3.sh /opt/klam/lib/downloadS3.sh
 
 # Restart SSHD
 echo "Restarting SSHD"
