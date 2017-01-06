@@ -202,24 +202,54 @@ sudo mv -f /home/core/klam.sh /etc/profile.d/klam.sh
 cat /etc/profile.d/klam.sh
 
 #  update /etc/ssh/sshd_config if necessary
-echo "Updating /etc/ssh/sshd_config if necessary"
-if ! grep /opt/klam/lib/authorizedkeys_command.sh /etc/ssh/sshd_config; then
+echo "Updating /etc/ssh/sshd_config"
 cat << EOT > sshd_config
 # Use most defaults for sshd configuration.
+UsePAM yes
 UsePrivilegeSeparation sandbox
 Subsystem sftp internal-sftp
 
 PermitRootLogin no
 PasswordAuthentication no
-ChallengeResponseAuthentication no
+ChallengeResponseAuthentication yes
 AuthorizedKeysCommand /opt/klam/lib/authorizedkeys_command.sh
 AuthorizedKeysCommandUser root
 ClientAliveInterval 900
 ClientAliveCountMax 0
 EOT
-  sudo mv -f sshd_config /etc/ssh/sshd_config
-fi
+sudo mv -f sshd_config /etc/ssh/sshd_config
+
 cat /etc/ssh/sshd_config
+
+echo "Setting up PAM modules"
+cat << EOT > system-login
+auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=60
+auth            required        pam_nologin.so
+auth		include         system-auth
+
+account         required        pam_access.so
+account         required        pam_nologin.so
+account         include         system-auth
+account         required        pam_tally2.so onerr=succeed
+
+password        include         system-auth
+
+session         optional        pam_loginuid.so
+session         required        pam_env.so
+session    	required    	pam_mkhomedir.so
+session         optional        pam_lastlog.so
+session         include         system-auth
+session         optional        pam_motd.so motd=/etc/motd
+session         optional        pam_mail.so
+EOT
+sudo mv -f system-login /etc/pam.d/system-login
+
+echo "Setting Up sudo access: $(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')"
+cat << EOT > ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN
+%ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN ALL=(ALL) NOPASSWD: ALL
+EOT
+sudo mv -f ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN /etc/sudoers.d/
+
 
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root"

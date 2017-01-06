@@ -7,8 +7,13 @@ fi
 
 echo "Creating User Directory"
 
-mkdir -p /home/$1 > /dev/null
-chown -R $1. /home/$1 > /dev/null
+if grep "pam_mkhomedir" /etc/pam.d/system-login; then
+  echo "PAM userdir"
+else
+  echo "create userdir"
+  mkdir -p /home/$1 > /dev/null
+  chown -R $1. /home/$1 > /dev/null
+fi
 
 echo "Running authorizedkeys_command for $1" | systemd-cat -p info -t klam-ssh
 
