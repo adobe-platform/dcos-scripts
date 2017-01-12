@@ -20,7 +20,7 @@
         "filesystem": "root",
         "path": "/opt/ethos/bin/dcos-oauth",
         "contents": {
-          "source": "https://ethos-utils.s3.amazonaws.com/dcos/bin/dcos-oauth",
+          "source": "https://ethos-utils.s3.amazonaws.com/dcos-oauth/v1/dcos-oauth",
           "verification": {}
         },
         "mode": 493,
