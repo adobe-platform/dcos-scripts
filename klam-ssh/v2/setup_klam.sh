@@ -223,7 +223,7 @@ cat /etc/ssh/sshd_config
 
 echo "Setting up PAM modules"
 cat << EOT > system-login
-auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=60
+auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=900
 auth            required        pam_nologin.so
 auth		include         system-auth
 
