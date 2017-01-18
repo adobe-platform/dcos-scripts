@@ -33,6 +33,10 @@ fi
 echo "adding user to docker group"
 gpasswd -a ${USER} docker
 
+echo "adding user to passwd file"
+sed -i "/${USER}/d" /etc/passwd
+echo "${USER}:x:$(id -u ${USER}):$(id -g ${USER}):KLAM USER ${USER}:/home/${USER}:/bin/bash" >> /etc/passwd
+
 echo "Running authorizedkeys_command for ${USER}" | systemd-cat -p info -t klam-ssh
 
 if [ -a ${SYSDFILE} ]; then
