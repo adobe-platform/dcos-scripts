@@ -58,16 +58,6 @@
         "name": "systemd-resolved.service"
       },
       {
-        "name": "docker.service",
-        "enable": true,
-        "dropins": [
-          {
-            "name": "11-ethos-files-wait.conf",
-            "contents": "[Unit]\nAfter=ethos-files.service\n"
-          }
-        ]
-      },
-      {
         "name": "systemd-journald.service",
         "enable": true
       },
