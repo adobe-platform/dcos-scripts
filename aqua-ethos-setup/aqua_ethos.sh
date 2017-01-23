@@ -24,7 +24,7 @@ while [[ -z $WEB_ACTIVE ]]; do
 done
 
 # Get a token from user/pass
-TOKEN_RESP=$(curl --silent "$WEB_URL/v1/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
+TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
 TOKEN=$(echo $TOKEN_RESP | jq -r .token)
 
 if [[ -z $TOKEN ]]; then
@@ -33,20 +33,20 @@ if [[ -z $TOKEN ]]; then
 fi
 
 # See if profile already exists
-EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/v1/adminrules/core-user-rule)
+EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
 
 if [[ "$EXISTING_RULE" == "200" ]]; then
 	log "core-user-rule exists..."
 else
-	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name":"core-user-rule","description": "Core User is Admin of all containers","role":"administrator","resources":{"containers":["*"],"images":["*"],"volumes":["*"],"networks":["*"]},"accessors":{"users":["core"]}}' $WEB_URL/v1/adminrules
+	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name":"core-user-rule","description": "Core User is Admin of all containers","role":"administrator","resources":{"containers":["*"],"images":["*"],"volumes":["*"],"networks":["*"]},"accessors":{"users":["core"]}}' $WEB_URL/adminrules
 fi
 
-EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/v1/securityprofiles/Ethos)
+EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
 
 if [[ "$EXISTING_PROFILE" == "200" ]]; then
 	log "Ethos profile exists..."
 else
-	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name": "Ethos", "type": "security.profile", "description": "Ethos Default RunTime Profile", "encrypt_all_envs": true}' $WEB_URL/v1/securityprofiles
+	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name": "Ethos", "type": "security.profile", "description": "Ethos Default RunTime Profile", "encrypt_all_envs": true}' $WEB_URL/securityprofiles
 fi
 
 if [[ ! -d $CRED_DIR ]]; then
@@ -56,7 +56,7 @@ fi
 sudo chmod 0755 $CRED_DIR
 sudo chown -R $(whoami):$(whoami) $CRED_DIR
 
-curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/v1/runtime_policy > $CRED_DIR/threat1_mitigation.json
+curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/runtime_policy > $CRED_DIR/threat1_mitigation.json
 
 sudo chmod 0755 $CRED_DIR/threat1_mitigation.json
 
@@ -64,17 +64,17 @@ sudo cat $CRED_DIR/threat1_mitigation.json | jq --arg default_security_profile E
 
 sudo chmod 0755 $CRED_DIR/threat_mitigation.json
 
-curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/threat_mitigation.json $WEB_URL/v1/runtime_policy
+curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/threat_mitigation.json $WEB_URL/runtime_policy
 
 sudo rm $CRED_DIR/*
 
 while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
 	log "Profile and rule are still active..."
-	TOKEN_RESP=$(curl --silent "$WEB_URL/v1/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
+	TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
 	TOKEN=$(echo $TOKEN_RESP | jq -r .token)
 
-	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/v1/adminrules/core-user-rule)
-	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/v1/securityprofiles/Ethos)
+	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
+	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
 	
 	if [[ "$EXISTING_RULE" == "200" && "$EXISTING_PROFILE" == "200" ]]; then
 		touch $CRED_DIR/healthcheck
