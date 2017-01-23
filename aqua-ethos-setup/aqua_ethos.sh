@@ -24,8 +24,13 @@ while [[ -z $WEB_ACTIVE ]]; do
 done
 
 # Get a token from user/pass
-TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
-TOKEN=$(echo $TOKEN_RESP | jq -r .token)
+function login {
+	TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
+	TOKEN=$(echo $TOKEN_RESP | jq -r .token)
+	touch $CRED_DIR/login
+}
+
+login
 
 if [[ -z $TOKEN ]]; then
 	log "Unable to log in using user/password"
@@ -49,29 +54,31 @@ else
 	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name": "Ethos", "type": "security.profile", "description": "Ethos Default RunTime Profile", "encrypt_all_envs": true}' $WEB_URL/securityprofiles
 fi
 
-if [[ ! -d $CRED_DIR ]]; then
-    sudo mkdir $CRED_DIR -p
+if [[ ! -d $CRED_DIR/configs ]]; then
+    sudo mkdir $CRED_DIR/configs -p
 fi
 
-sudo chmod 0755 $CRED_DIR
-sudo chown -R $(whoami):$(whoami) $CRED_DIR
+sudo chmod 0755 $CRED_DIR/configs
+sudo chown -R $(whoami):$(whoami) $CRED_DIR/configs
 
-curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/runtime_policy > $CRED_DIR/threat1_mitigation.json
+curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/runtime_policy > $CRED_DIR/configs/threat1_mitigation.json
 
-sudo chmod 0755 $CRED_DIR/threat1_mitigation.json
+sudo chmod 0755 $CRED_DIR/configs/threat1_mitigation.json
 
-sudo cat $CRED_DIR/threat1_mitigation.json | jq --arg default_security_profile Ethos '. + {default_security_profile: $default_security_profile}' > $CRED_DIR/threat_mitigation.json
+sudo cat $CRED_DIR/configs/threat1_mitigation.json | jq --arg default_security_profile Ethos '. + {default_security_profile: $default_security_profile}' > $CRED_DIR/configs/threat_mitigation.json
 
-sudo chmod 0755 $CRED_DIR/threat_mitigation.json
+sudo chmod 0755 $CRED_DIR/configs/threat_mitigation.json
 
-curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/threat_mitigation.json $WEB_URL/runtime_policy
+curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mitigation.json $WEB_URL/runtime_policy
 
-sudo rm $CRED_DIR/*
+sudo rm -rf $CRED_DIR/configs
 
 while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
 	log "Profile and rule are still active..."
-	TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
-	TOKEN=$(echo $TOKEN_RESP | jq -r .token)
+
+	if [[ $(expr $(date +%s) - $(date +%s -r $CRED_DIR/login)) -gt 1800 ]]; then
+		login
+	fi
 
 	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
 	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
@@ -80,7 +87,8 @@ while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
 		touch $CRED_DIR/healthcheck
 	fi
 
-	sleep 60
+	# Wait for 5 minutes
+	sleep 300
 done
 
 log "Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) could not be found in Aqua, restarting to ensure compliance..."
