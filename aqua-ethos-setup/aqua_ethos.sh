@@ -81,17 +81,18 @@ curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mi
 
 sudo rm -rf $CRED_DIR/configs
 
-while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
-	log "Profile and rule are still active..."
+while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" ]]; do
+	log "Profile and label and rule are still active..."
 
 	if [[ $(expr $(date +%s) - $(date +%s -r $CRED_DIR/login)) -gt 1800 ]]; then
 		login
 	fi
 
 	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
+	EXISTING_LABEL=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/settings/labels/production%20approved)
 	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
 
-	if [[ "$EXISTING_RULE" == "200" && "$EXISTING_PROFILE" == "200" ]]; then
+	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" ]]; then
 		touch $CRED_DIR/healthcheck
 	fi
 
@@ -99,5 +100,5 @@ while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
 	sleep 300
 done
 
-log "Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) could not be found in Aqua, restarting to ensure compliance..."
+log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) could not be found in Aqua, restarting to ensure compliance..."
 exit 1
