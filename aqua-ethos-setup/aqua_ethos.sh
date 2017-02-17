@@ -73,6 +73,9 @@ curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mi
 
 sudo rm -rf $CRED_DIR/configs
 
+#qualys integration API
+curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d '{ "enabled":true, "url":"$QUALYS_URL", "username":"$QUALYS_USERNAME", "password":"$QUALYS_PASSWORD" }' $WEB_URL/settings/integrations/qualys
+
 while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
 	log "Profile and rule are still active..."
 
@@ -82,7 +85,7 @@ while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
 
 	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
 	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
-	
+
 	if [[ "$EXISTING_RULE" == "200" && "$EXISTING_PROFILE" == "200" ]]; then
 		touch $CRED_DIR/healthcheck
 	fi
