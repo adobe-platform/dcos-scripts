@@ -46,6 +46,14 @@ else
 	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name":"core-user-rule","description": "Core User is Admin of all containers","role":"administrator","resources":{"containers":["*"],"images":["*"],"volumes":["*"],"networks":["*"]},"accessors":{"users":["core"]}}' $WEB_URL/adminrules
 fi
 
+IMAGE_ASSURANCE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/image_policy)
+
+if [[ "$IMAGE_ASSURANCE" == "200" ]]; then
+	log "image-assurance-rule exists..."
+else
+curl --silent -H "$HEADER: Bearer $TOKEN" -X POST -d '{"only_registered_images":true,"daily_scan_enabled":true,"daily_scan_time":{"hour":1,"minute":0,"second":0},"average_score_enabled":false,"average_score":7.5,"maximum_score_enabled":false,"maximum_score":8,"author":"system","cves_black_list_enabled":true,"cves_black_list":["CVE-2014-6271","CVE-2014-0160","CVE-2012-1723","CVE-2013-2465","CVE-2016-2842","CVE-2016-2108","CVE-2016-0705"],"allowed_images":[]}' $WEB_URL/image_policy
+fi
+
 EXISTING_LABEL=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/settings/labels/production%20approved)
 
 if [[ "$EXISTING_LABEL" == "200" ]]; then
@@ -91,8 +99,9 @@ while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING
 	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
 	EXISTING_LABEL=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/settings/labels/production%20approved)
 	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
+  IMAGE_ASSURANCE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/image_policy)
 
-	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" ]]; then
+	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" && "IMAGE_ASSURANCE" == "200" ]]; then
 		touch $CRED_DIR/healthcheck
 	fi
 
@@ -100,5 +109,5 @@ while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING
 	sleep 300
 done
 
-log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) could not be found in Aqua, restarting to ensure compliance..."
+log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) or image assurance ($IMAGE_ASSURANCE) could not be found in Aqua, restarting to ensure compliance..."
 exit 1
