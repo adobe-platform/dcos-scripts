@@ -58,10 +58,6 @@
         "mask": true
       },
       {
-        "name": "update-engine.service",
-        "mask": true
-      },
-      {
         "name": "locksmithd.service",
         "mask": true
       },
@@ -76,6 +72,16 @@
         "name": "dcos-link-env.service",
         "enable": true,
         "contents": "[Unit]\nBefore=dcos.target\n[Service]\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStartPre=/usr/bin/mkdir -p /etc/profile.d\nExecStart=/usr/bin/ln -sf /opt/mesosphere/environment.export /etc/profile.d/dcos.sh\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "update-os.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Check for CoreOS updates\nWants=update-os.timer\n[Service]\nUser=root\nType=simple\nExecStartPre=/usr/bin/bash -c \"/usr/bin/test -d /var/lib/skopos || /usr/bin/mkdir -p /var/lib/skopos\"\nExecStart=/usr/bin/bash -c \"if [ 0 -lt $(update_engine_client -update 2\u003e\u00261 |grep -c NEED_REBOOT) ] ;then echo 'CoreOS signaling reboot required'; touch /var/lib/skopos/needs_reboot; fi\"\n"
+      },
+      {
+        "name": "update-os.timer",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Runs CoreOS update check every 5m\n[Timer]\nOnBootSec=10min\nOnUnitActiveSec=5min\n[Install]\nWantedBy=multi-user.target\n"
       },
       {
         "name": "dcos-download.service",
@@ -128,7 +134,7 @@
         "dropins": [
           {
             "name": "10-dcos-marathon-framework-auth.conf",
-            "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=SASL_PATH=/opt/mesosphere/lib/sasl2\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE=/etc/ethos/dcos-marathon-secret"
+            "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE=/etc/ethos/dcos-marathon-secret"
           }
         ]
       }
