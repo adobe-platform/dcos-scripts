@@ -70,6 +70,17 @@ else
 	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name": "Ethos", "type": "security.profile", "description": "Ethos Default RunTime Profile", "encrypt_all_envs": true}' $WEB_URL/securityprofiles
 fi
 
+GATEWAY_IP=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq ".[] |.id")
+GATEWAY=$(echo "${GATEWAY_IP//\"}")
+HOSTBATCH_RULE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/hostsbatch | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
+HOSTBATCH_RULE_FINAL=$(echo "${HOSTBATCH_RULE:(-3)}")
+
+if [[ "$HOSTBATCH_RULE_FINAL" == "200" ]]; then
+         log "Host batch rule exists...";
+else
+         curl --silent -H "$HEADER: Bearer $TOKEN" -X POST -d '{"logicalname":"production-token","token":"production-token-value","description":"Batch install for production hosts.","enforce":true,"allowed_labels":["production label"],"allowed_registries":["Docker Hub"],"gateways":["'"$GATEWAY"'"]}' $WEB_URL/hostsbatch
+fi
+
 if [[ ! -d $CRED_DIR/configs ]]; then
     sudo mkdir $CRED_DIR/configs -p
 fi
@@ -89,7 +100,7 @@ curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mi
 
 sudo rm -rf $CRED_DIR/configs
 
-while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" && "$IMAGE_ASSURANCE" == "200" ]]; do
+while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" && "$IMAGE_ASSURANCE" == "200" && "$HOSTBATCH_RULE_FINAL" == "200" ]]; do
 	log "Profile and label and rule are still active..."
 
 	if [[ $(expr $(date +%s) - $(date +%s -r $CRED_DIR/login)) -gt 1800 ]]; then
@@ -100,8 +111,12 @@ while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING
 	EXISTING_LABEL=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/settings/labels/production%20approved)
 	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
   IMAGE_ASSURANCE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/image_policy)
+  GATEWAY_IP=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq ".[] |.id")
+	GATEWAY=$(echo "${GATEWAY_IP//\"}")
+	HOSTBATCH_RULE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/hostsbatch | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
+	HOSTBATCH_RULE_FINAL=$(echo "${HOSTBATCH_RULE:(-3)}")
 
-	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" && "IMAGE_ASSURANCE" == "200" ]]; then
+	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" && "IMAGE_ASSURANCE" == "200" && "$HOSTBATCH_RULE_FINAL" == "200" ]]; then
 		touch $CRED_DIR/healthcheck
 	fi
 
