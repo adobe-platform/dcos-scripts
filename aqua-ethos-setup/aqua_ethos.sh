@@ -51,7 +51,7 @@ IMAGE_ASSURANCE=$(curl --write-out %{http_code} --silent --output /dev/null -H "
 if [[ "$IMAGE_ASSURANCE" == "200" ]]; then
 	log "image-assurance-rule exists..."
 else
-curl --silent -H "$HEADER: Bearer $TOKEN" -X POST -d '{"only_registered_images":true,"daily_scan_enabled":true,"daily_scan_time":{"hour":1,"minute":0,"second":0},"average_score_enabled":false,"average_score":7.5,"maximum_score_enabled":false,"maximum_score":8,"author":"system","cves_black_list_enabled":true,"cves_black_list":["CVE-2014-6271","CVE-2014-0160","CVE-2012-1723","CVE-2013-2465","CVE-2016-2842","CVE-2016-2108","CVE-2016-0705"],"allowed_images":[]}' $WEB_URL/image_policy
+	curl --silent -H "$HEADER: Bearer $TOKEN" -X POST -d '{"only_registered_images":true,"daily_scan_enabled":true,"daily_scan_time":{"hour":1,"minute":0,"second":0},"average_score_enabled":false,"average_score":7.5,"maximum_score_enabled":false,"maximum_score":8,"author":"system","cves_black_list_enabled":true,"cves_black_list":["CVE-2014-6271","CVE-2014-0160","CVE-2012-1723","CVE-2013-2465","CVE-2016-2842","CVE-2016-2108","CVE-2016-0705"],"allowed_images":[]}' $WEB_URL/image_policy
 fi
 
 EXISTING_LABEL=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/settings/labels/production%20approved)
@@ -89,7 +89,7 @@ curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mi
 
 sudo rm -rf $CRED_DIR/configs
 
-while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" ]]; do
+while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" && "$IMAGE_ASSURANCE" == "200" ]]; do
 	log "Profile and label and rule are still active..."
 
 	if [[ $(expr $(date +%s) - $(date +%s -r $CRED_DIR/login)) -gt 1800 ]]; then
