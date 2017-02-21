@@ -124,5 +124,5 @@ while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING
 	sleep 300
 done
 
-log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) or image assurance ($IMAGE_ASSURANCE) could not be found in Aqua, restarting to ensure compliance..."
+log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) or image assurance ($IMAGE_ASSURANCE) or hostbatch rule ($HOSTBATCH_RULE_FINAL) could not be found in Aqua, restarting to ensure compliance..."
 exit 1
