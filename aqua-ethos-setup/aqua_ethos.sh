@@ -70,6 +70,14 @@ else
 	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"name": "Ethos", "type": "security.profile", "description": "Ethos Default RunTime Profile", "encrypt_all_envs": true}' $WEB_URL/securityprofiles
 fi
 
+EXISTING_ARTIFACTORY=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/registries/artifactory-test)
+
+if [[ "$EXISTING_ARTIFACTORY" == "200" ]]; then
+	log "Artifactory Integration exists..."
+else
+	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d  '{"prefixes": [], "auto_pull": false, "auto_pull_time": "03:00", "auto_pull_max": 100, "name": "artifactory-test", "type": "ART", "webhook": {"enabled": false, "url": "", "auth_token": ""}, "url": "$Artifactory_URL", "username": "$Artifactory_USERNAME", "password": "$Artifactory_PASSWORD"}' $WEB_URL/registries
+fi
+
 GATEWAY_IP=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq ".[] |.id")
 GATEWAY=$(echo "${GATEWAY_IP//\"}")
 HOSTBATCH_RULE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/hostsbatch | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
@@ -100,7 +108,7 @@ curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mi
 
 sudo rm -rf $CRED_DIR/configs
 
-while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" && "$IMAGE_ASSURANCE" == "200" && "$HOSTBATCH_RULE_FINAL" == "200" ]]; do
+while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_RULE" == "200" && "$IMAGE_ASSURANCE" == "200" && "$HOSTBATCH_RULE_FINAL" == "200" && "$EXISTING_ARTIFACTORY" == "200" ]]; do
 	log "Profile and label and rule are still active..."
 
 	if [[ $(expr $(date +%s) - $(date +%s -r $CRED_DIR/login)) -gt 1800 ]]; then
@@ -111,12 +119,13 @@ while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING
 	EXISTING_LABEL=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/settings/labels/production%20approved)
 	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
   IMAGE_ASSURANCE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/image_policy)
+  EXISTING_ARTIFACTORY=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/registries/artifactory-test)
   GATEWAY_IP=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq ".[] |.id")
 	GATEWAY=$(echo "${GATEWAY_IP//\"}")
 	HOSTBATCH_RULE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/hostsbatch | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
 	HOSTBATCH_RULE_FINAL=$(echo "${HOSTBATCH_RULE:(-3)}")
 
-	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" && "IMAGE_ASSURANCE" == "200" && "$HOSTBATCH_RULE_FINAL" == "200" ]]; then
+	if [[ "$EXISTING_RULE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING_PROFILE" == "200" && "IMAGE_ASSURANCE" == "200" && "$HOSTBATCH_RULE_FINAL" == "200" && "$EXISTING_ARTIFACTORY" == "200" ]]; then
 		touch $CRED_DIR/healthcheck
 	fi
 
@@ -124,5 +133,5 @@ while [[ "$EXISTING_PROFILE" == "200" && "EXISTING_LABEL" == "200" && "$EXISTING
 	sleep 300
 done
 
-log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) or image assurance ($IMAGE_ASSURANCE) or hostbatch rule ($HOSTBATCH_RULE_FINAL) could not be found in Aqua, restarting to ensure compliance..."
+log "Profile ($EXISTING_PROFILE) or Label ($EXISTING_LABEL) or rule ($EXISTING_RULE) or image assurance ($IMAGE_ASSURANCE) or hostbatch rule ($HOSTBATCH_RULE_FINAL) or integration ($EXISTING_ARTIFACTORY) could not be found in Aqua, restarting to ensure compliance..."
 exit 1
