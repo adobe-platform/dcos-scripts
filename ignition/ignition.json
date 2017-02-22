@@ -48,6 +48,39 @@
         "mode": 493,
         "user": {},
         "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/ethos/bin/dcos-exhibitor-ssl",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aenvfiles%3D%22%2Fetc%2Fethos%2Fexhibitor.env%22%0Afor%20f%20in%20%24envfiles%0Ado%0A%20%20if%20%5B%20-f%20%24f%20%5D%3B%20then%0A%20%20%20%20source%20%24f%0A%20%20fi%0Adone%0Aif%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20echo%20%22SSLFRAMEWORK%20ENABLED%2C%20Configuring%20SecureClient%20Port%22%0A%20%20if%20!%20grep%20%5C%22secureClientPort%5C%22%20%24(grep%20ExecStart%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-exhibitor.service%20%7C%20awk%20-F'%3D'%20'%7Bprint%20%242%7D')%3B%20then%20sed%20-i%20s%2Fzoo-cfg-extra%3D%2Fzoo-cfg-extra%3DsecureClientPort%5C%5C%5C%5C%3D2281%5C%5C%5C%26%2Fg%20%24(grep%20ExecStart%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-exhibitor.service%20%7C%20awk%20-F'%3D'%20'%7Bprint%20%242%7D')%3B%20fi%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/ethos/bin/dcos-sslframework-setup",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aenvfiles%3D%22%2Fetc%2Fethos%2Fsslframework.env%22%0Afor%20f%20in%20%24envfiles%0Ado%0A%20%20if%20%5B%20-f%20%24f%20%5D%3B%20then%0A%20%20%20%20source%20%24f%0A%20%20fi%0Adone%0Aif%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20wget%20--no-check-certificate%20%22%24MARATHON_SSLKEYSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fmarathon.jks%0A%20%20wget%20--no-check-certificate%20%22%24ZK_SSLKEYSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fzk.jks%0A%20%20wget%20--no-check-certificate%20%22%24ZK_SSLTRUSTSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fzktrust.jks%0A%20%20%23%20securing%20zookeeper%2Fexhibitor%0A%20%20mkdir%20-p%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2F%0A%20%20while%20%5B%20!%20-d%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%20%5D%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20cat%20%2Fetc%2Fethos%2Fsslframework.env%20%3E%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2Fjava.env%0Acat%20%3C%3C%20EOF%20%3E%3E%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2Fjava.env%0A%0Aexport%20SERVER_JVMFLAGS%3D%22-Dzookeeper.serverCnxnFactory%3Dorg.apache.zookeeper.server.NettyServerCnxnFactory%20-Dzookeeper.ssl.keyStore.location%3D%2Fetc%2Fethos%2Fzk.jks%20-Dzookeeper.ssl.keyStore.password%3D%24ZK_SSLKEYSTORE_PASSWORD%20-Dzookeeper.ssl.trustStore.location%3D%2Fetc%2Fethos%2Fzktrust.jks%20-Dzookeeper.ssl.trustStore.password%3D%24ZK_SSLTRUSTSTORE_PASSWORD%22%0Aexport%20CLIENT_JVMFLAGS%3D%22-Dzookeeper.clientCnxnSocket%3Dorg.apache.zookeeper.ClientCnxnSocketNetty%20-Dzookeeper.client.secure%3Dtrue%20-Dzookeeper.ssl.keyStore.location%3D%2Fetc%2Fethos%2Fzk.jks%20-Dzookeeper.ssl.keyStore.password%3D%24ZK_SSLKEYSTORE_PASSWORD%20-Dzookeeper.ssl.trustStore.location%3D%2Fetc%2Fethos%2Fzktrust.jks%20-Dzookeeper.ssl.trustStore.password%3D%24ZK_SSLTRUSTSTORE_PASSWORD%22%0AEOF%0A%20%20cp%20%2Fetc%2Fethos%2Fsslframework.env%20%2Fetc%2Fethos%2Fexhibitor.env%0A%20%20while%20!%20id%20-u%20%22dcos_exhibitor%22%20%3E%20dev%2Fnull%202%3E%261%3B%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20while%20%5B%20!%20-f%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-exhibitor.service%20%5D%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20chown%20-R%20dcos_exhibitor%3Adcos_exhibitor%20%24(grep%20ExecStart%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-exhibitor.service%20%7C%20awk%20-F'%3D'%20'%7Bprint%20%242%7D'%20%7C%20awk%20-F'%2Fstart_exhibitor'%20'%7Bprint%20%241%7D')%0A%20%20chown%20dcos_exhibitor%3Adcos_exhibitor%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2Fjava.env%0A%20%20chown%20dcos_exhibitor%3Adcos_exhibitor%20%2Fetc%2Fethos%2Fexhibitor.env%0A%20%20chown%20dcos_exhibitor%3Adcos_exhibitor%20%2Fetc%2Fethos%2Fzk.jks%0A%20%20%23%20securing%20mesos%0A%20%20%23%20securing%20marathon%0A%20%20cp%20%2Fetc%2Fethos%2Fsslframework.env%20%2Fetc%2Fethos%2Fmarathon.env%0A%20%20while%20!%20id%20-u%20%22dcos_marathon%22%20%3E%20dev%2Fnull%202%3E%261%3B%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20chown%20dcos_marathon%3Adcos_marathon%20%2Fetc%2Fethos%2Fmarathon.env%0A%20%20chown%20dcos_marathon%3Adcos_marathon%20%2Fetc%2Fethos%2Fmarathon.jks%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/ethos/marathon.sh",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aenvfiles%3D%22%2Fetc%2Fethos%2Fmarathon.env%20%2Fopt%2Fmesosphere%2Fenvironment%20%2Fopt%2Fmesosphere%2Fetc%2Fmarathon%20%2Fopt%2Fmesosphere%2Fetc%2Fmarathon-extras%20%2Fvar%2Flib%2Fdcos%2Fmarathon%2Fenvironment.ip.marathon%22%0Afor%20f%20in%20%24envfiles%0Ado%0A%20%20if%20%5B%20-f%20%24f%20%5D%3B%20then%0A%20%20%20%20source%20%24f%0A%20%20fi%0Adone%0ASASL_PATH%3D%2Fopt%2Fmesosphere%2Flib%2Fsasl2%0AMARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE%3D%2Fetc%2Fethos%2Fdcos-marathon-secret%0AJARFILE%3D%60grep%20marathon.jar%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-marathon.service%20%7C%20awk%20-F'%22'%20'%7Bprint%20%242%7D'%60%0Aif%20%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20if%20%5B%20!%20-f%20%2Fetc%2Fethos%2Fmarathon.jks%20%5D%3B%20then%0A%20%20%20%20wget%20--no-check-certificate%20%22%24MARATHON_SSLKEYSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fmarathon.jks%0A%20%20fi%0A%20%20if%20%5B%20!%20-s%20%2Fetc%2Fethos%2Fmarathon.jks%20%5D%3B%20then%0A%20%20%20%20echo%20%22marathon.jks%20is%20empty%22%0A%20%20%20%20SSLFRAMEWORK_ENABLED%3D%22false%22%0A%20%20fi%0Afi%0Aif%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22false%22%20%5D%5D%3B%20then%0A%20%20%2Fopt%2Fmesosphere%2Fbin%2Fjava%20%5C%0A%20%20-Xmx2G%20%5C%0A%20%20-jar%20%22%24JARFILE%22%20%5C%0A%20%20--zk%20%22%24MARATHON_ZK%22%20%5C%0A%20%20--master%20zk%3A%2F%2Fzk-1.zk%3A2181%2Czk-2.zk%3A2181%2Czk-3.zk%3A2181%2Czk-4.zk%3A2181%2Czk-5.zk%3A2181%2Fmesos%20%5C%0A%20%20--hostname%20%22%24MARATHON_HOSTNAME%22%20%5C%0A%20%20--default_accepted_resource_roles%20%22*%22%20%5C%0A%20%20--mesos_role%20%22slave_public%22%20%5C%0A%20%20--max_tasks_per_offer%20100%20%5C%0A%20%20--task_launch_timeout%2086400000%20%5C%0A%20%20--decline_offer_duration%20300000%20%5C%0A%20%20--revive_offers_for_new_apps%20%5C%0A%20%20--zk_compression%20%5C%0A%20%20--mesos_leader_ui_url%20%22%2Fmesos%22%20%5C%0A%20%20--enable_features%20%22vips%2Ctask_killing%2Cexternal_volumes%22%20%5C%0A%20%20--mesos_authentication_principal%20%22dcos-marathon%22%20%5C%0A%20%20--mesos_authentication%20%5C%0A%20%20--mesos_authentication_secret_file%20%24MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE%20%5C%0A%20%20--mesos_user%20%22root%22%0Aelse%0A%20%20%2Fopt%2Fmesosphere%2Fbin%2Fjava%20%5C%0A%20%20-Xmx2G%20%5C%0A%20%20-jar%20%22%24JARFILE%22%20%5C%0A%20%20--zk%20%22%24MARATHON_ZK%22%20%5C%0A%20%20--master%20zk%3A%2F%2Fzk-1.zk%3A2181%2Czk-2.zk%3A2181%2Czk-3.zk%3A2181%2Czk-4.zk%3A2181%2Czk-5.zk%3A2181%2Fmesos%20%5C%0A%20%20--hostname%20%22%24MARATHON_HOSTNAME%22%20%5C%0A%20%20--default_accepted_resource_roles%20%22*%22%20%5C%0A%20%20--mesos_role%20%22slave_public%22%20%5C%0A%20%20--max_tasks_per_offer%20100%20%5C%0A%20%20--task_launch_timeout%2086400000%20%5C%0A%20%20--decline_offer_duration%20300000%20%5C%0A%20%20--revive_offers_for_new_apps%20%5C%0A%20%20--zk_compression%20%5C%0A%20%20--mesos_leader_ui_url%20%22%2Fmesos%22%20%5C%0A%20%20--enable_features%20%22vips%2Ctask_killing%2Cexternal_volumes%22%20%5C%0A%20%20--mesos_authentication_principal%20%22dcos-marathon%22%20%5C%0A%20%20--mesos_authentication%20%5C%0A%20%20--mesos_authentication_secret_file%20%24MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE%20%5C%0A%20%20--ssl_keystore_path%20%2Fetc%2Fethos%2Fmarathon.jks%20%5C%0A%20%20--ssl_keystore_password%20%22%24MARATHON_SSLKEYSTORE_PASSWORD%22%20%5C%0A%20%20--mesos_user%20%22root%22%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
       }
     ]
   },
@@ -128,9 +161,23 @@
         "dropins": [
           {
             "name": "10-dcos-marathon-framework-auth.conf",
-            "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=SASL_PATH=/opt/mesosphere/lib/sasl2\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE=/etc/ethos/dcos-marathon-secret"
+            "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nExecStart=\nExecStart=/opt/ethos/marathon.sh\n"
           }
         ]
+      },
+      {
+        "name": "dcos-exhibitor.service",
+        "dropins": [
+          {
+            "name": "10-dcos-exhibitor-framework-ssl.conf",
+            "contents": "[Unit]\nAfter=dcos-sslframework-setup.service\n[Service]\nExecStartPre=/opt/ethos/bin/dcos-exhibitor-ssl\n"
+          }
+        ]
+      },
+      {
+        "name": "dcos-sslframework-setup.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=SSLFramework: Setup SSL Framework Communications.\nRequires=dcos-download.service\nAfter=network-online.target\nWants=network-online.target\n[Service]\nUser=root\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStart=/opt/ethos/bin/dcos-sslframework-setup\n[Install]\nWantedBy=multi-user.target\n"
       }
     ]
   },
