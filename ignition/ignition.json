@@ -48,11 +48,48 @@
         "mode": 493,
         "user": {},
         "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/etc/ssh/sshd_config",
+        "contents": {
+          "source": "data:,%23%20Use%20most%20defaults%20for%20sshd%20configuration.%0AUsePrivilegeSeparation%20sandbox%0ASubsystem%20sftp%20internal-sftp%0AClientAliveInterval%20180%0AUseDNS%20no%0AUsePAM%20yes%0APrintLastLog%20no%20%23%20handled%20by%20PAM%0APrintMotd%20no%20%23%20handled%20by%20PAM%0AAuthorizedKeysCommandUser%20nobody%0AAuthorizedKeysCommand%20%2Fusr%2Fbin%2Fsss_ssh_authorizedkeys%0A",
+          "verification": {}
+        },
+        "mode": 384,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/etc/sudoers.d/group-cst",
+        "contents": {
+          "source": "data:,%25CST%20ALL%3D(ALL)%20NOPASSWD%3A%20LOG_INPUT%3A%20LOG_OUTPUT%3A%20ALL%0A",
+          "verification": {}
+        },
+        "mode": 384,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/etc/ip_detect",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fsh%0Aset%20-o%20nounset%20-o%20errexit%0A%0A%23%20Get%20COREOS%20COREOS_PRIVATE_IPV4%0Aif%20%5B%20-e%20%2Fetc%2Fenvironment%20%5D%0Athen%0A%20%20set%20-o%20allexport%0A%20%20.%20%2Fetc%2Fenvironment%0A%20%20set%20%2Bo%20allexport%0Afi%0A%0A%23%20Get%20the%20IP%20address%20of%20the%20interface%20specified%20by%20%241%0Aget_ip_from_interface()%0A%7B%0A%20%20%20%20echo%20%24(ip%20addr%20show%20eth0%20%7C%20grep%20-Eo%20%22(%5B0-9%5D%7B1%2C3%7D%5C.)%7B3%7D%5B0-9%5D%7B1%2C3%7D%22%20%7C%20head%20-1)%0A%7D%0Aecho%20%24%7BCOREOS_PRIVATE_IPV4%3A-%24(get_ip_from_interface%20eth0)%7D%0A",
+          "verification": {}
+        },
+        "mode": 420,
+        "user": {},
+        "group": {}
       }
     ]
   },
   "systemd": {
     "units": [
+      {
+        "name": "sssd.service",
+        "enable": true
+      },
       {
         "name": "etcd.service",
         "mask": true
@@ -128,9 +165,29 @@
         "dropins": [
           {
             "name": "10-dcos-marathon-framework-auth.conf",
-            "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=SASL_PATH=/opt/mesosphere/lib/sasl2\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE=/etc/ethos/dcos-marathon-secret"
+            "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=SASL_PATH=/opt/mesosphere/lib/sasl2\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE=/etc/ethos/dcos-marathon-secret\n"
           }
         ]
+      },
+      {
+        "name": "format-and-mount-disks.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=AWS Setup: Detects and mounts disk\nBefore=ethos-files.mount dbus.service\nConditionPathExists=/etc/mesosphere/roles/aws\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=-/bin/bash /opt/ethos/bin/format-and-mount-disks\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "dcos-config-writer.service",
+        "enable": true,
+        "contents": "[Unit]\nRequires=dcos-ip-detect.service\nAfter=dcos-ip-detect.service\nConditionPathExists=/etc/mesosphere/roles/azure\n[Service]\nType=oneshot\nEnvironmentFile=/etc/environment\nEnvironmentFile=/opt/mesosphere/environment\nExecStart=/usr/bin/bash -c \"echo $(detect_ip) $(hostname) \\u003e /etc/hosts\"\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "dcos-ip-detect.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Rewrite of IP Detect script for DC/OS\nRequires=dcos-setup.service\nAfter=dcos-setup.service\n[Service]\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStartPre=/bin/cp /etc/ip_detect /opt/mesosphere/bin/detect_ip\nExecStartPre=/bin/cp /etc/ip_detect /opt/mesosphere/bin/detect_ip_public\nExecStart=/opt/mesosphere/bin/detect_ip\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "ethos-auth.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Ethos Setup: Auth Generation\nAfter=network-online.target\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash /opt/ethos/bin/setup-auth-files\n[Install]\nWantedBy=multi-user.target"
       }
     ]
   },
