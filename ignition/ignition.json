@@ -51,6 +51,39 @@
       },
       {
         "filesystem": "root",
+        "path": "/opt/ethos/bin/dcos-exhibitor-ssl",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aenvfiles%3D%22%2Fetc%2Fethos%2Fexhibitor.env%22%0Afor%20f%20in%20%24envfiles%0Ado%0A%20%20if%20%5B%20-f%20%24f%20%5D%3B%20then%0A%20%20%20%20source%20%24f%0A%20%20fi%0Adone%0Aif%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20echo%20%22SSLFRAMEWORK%20ENABLED%2C%20Configuring%20SecureClient%20Port%22%0A%20%20if%20!%20grep%20%22secureClientPort%22%20%24(grep%20ExecStart%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-exhibitor.service%20%7C%20awk%20-F'%3D'%20'%7Bprint%20%242%7D')%3B%20then%20sed%20-i%20s%2Fzoo-cfg-extra%3D%2Fzoo-cfg-extra%3DsecureClientPort%5C%5C%5C%5C%3D2281%5C%5C%5C%26%2Fg%20%24(grep%20ExecStart%20%2Fetc%2Fsystemd%2Fsystem%2Fdcos-exhibitor.service%20%7C%20awk%20-F'%3D'%20'%7Bprint%20%242%7D')%3B%20fi%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/ethos/bin/dcos-marathon-ssl",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aenvfiles%3D%22%2Fetc%2Fethos%2Fmarathon.env%22%0Afor%20f%20in%20%24envfiles%0Ado%0A%20%20if%20%5B%20-f%20%24f%20%5D%3B%20then%0A%20%20%20%20source%20%24f%0A%20%20fi%0Adone%0Aif%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20echo%20%22SSLFRAMEWORK%20ENABLED%3A%20Configuring%20Marathon%20Systemd%20Service%20With%20KeyStore%22%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/ethos/bin/dcos-sslframework-setup",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aenvfiles%3D%22%2Fetc%2Fethos%2Fsslframework.env%22%0Afor%20f%20in%20%24envfiles%0Ado%0A%20%20if%20%5B%20-f%20%24f%20%5D%3B%20then%0A%20%20%20%20source%20%24f%0A%20%20fi%0Adone%0Aif%20%5B%5B%20%22%24SSLFRAMEWORK_ENABLED%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20wget%20--no-check-certificate%20%22%24MARATHON_SSLKEYSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fmarathon.jks%0A%20%20wget%20--no-check-certificate%20%22%24ZK_SSLKEYSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fzk.jks%0A%20%20wget%20--no-check-certificate%20%22%24ZK_SSLTRUSTSTORE_URL%22%20-O%20%2Fetc%2Fethos%2Fzktrust.jks%0A%20%20%23%20securing%20zookeeper%2Fexhibitor%0A%20%20mkdir%20-p%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2F%0A%20%20while%20%5B%20!%20-d%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%20%5D%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20cat%20%2Fetc%2Fethos%2Fsslframework.env%20%3E%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2Fjava.env%0Acat%20%3C%3C%20EOF%20%3E%3E%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2Fjava.env%0A%0Aexport%20SERVER_JVMFLAGS%3D%22-Dzookeeper.serverCnxnFactory%3Dorg.apache.zookeeper.server.NettyServerCnxnFactory%20-Dzookeeper.ssl.keyStore.location%3D%2Fetc%2Fethos%2Fzk.jks%20-Dzookeeper.ssl.keyStore.password%3D%24ZK_SSLKEYSTORE_PASSWORD%20-Dzookeeper.ssl.trustStore.location%3D%2Fetc%2Fethos%2Fzktrust.jks%20-Dzookeeper.ssl.trustStore.password%3D%24ZK_SSLTRUSTSTORE_PASSWORD%22%0Aexport%20CLIENT_JVMFLAGS%3D%22-Dzookeeper.clientCnxnSocket%3Dorg.apache.zookeeper.ClientCnxnSocketNetty%20-Dzookeeper.client.secure%3Dtrue%20-Dzookeeper.ssl.keyStore.location%3D%2Fetc%2Fethos%2Fzk.jks%20-Dzookeeper.ssl.keyStore.password%3D%24ZK_SSLKEYSTORE_PASSWORD%20-Dzookeeper.ssl.trustStore.location%3D%2Fetc%2Fethos%2Fzktrust.jks%20-Dzookeeper.ssl.trustStore.password%3D%24ZK_SSLTRUSTSTORE_PASSWORD%22%0AEOF%0A%20%20cp%20%2Fetc%2Fethos%2Fsslframework.env%20%2Fetc%2Fethos%2Fexhibitor.env%0A%20%20while%20!%20id%20-u%20%22dcos_exhibitor%22%20%3E%20dev%2Fnull%202%3E%261%3B%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20while%20%5B%20!%20-f%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20exhibitor%20%7C%20head%20-1)%2Fdcos.target.wants_master%2Fdcos-exhibitor.service%20%5D%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20chown%20-R%20dcos_exhibitor%3Adcos_exhibitor%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20exhibitor%20%7C%20head%20-1)%0A%20%20chown%20-R%20dcos_exhibitor%3Adcos_exhibitor%20%24(grep%20ExecStart%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20exhibitor%20%7C%20head%20-1)%2Fdcos.target.wants_master%2Fdcos-exhibitor.service%20%7C%20awk%20-F'%3D'%20'%7Bprint%20%242%7D'%20%7C%20awk%20-F'%2Fstart_exhibitor'%20'%7Bprint%20%241%7D')%0A%20%20chown%20dcos_exhibitor%3Adcos_exhibitor%20%2Fvar%2Flib%2Fdcos%2Fexhibitor%2Fconf%2Fjava.env%0A%20%20chown%20dcos_exhibitor%3Adcos_exhibitor%20%2Fetc%2Fethos%2Fexhibitor.env%0A%20%20chown%20dcos_exhibitor%3Adcos_exhibitor%20%2Fetc%2Fethos%2Fzk.jks%0A%20%20%23%20securing%20mesos%0A%20%20%23%20securing%20marathon%0A%20%20cp%20%2Fetc%2Fethos%2Fsslframework.env%20%2Fetc%2Fethos%2Fmarathon.env%0A%20%20while%20!%20id%20-u%20%22dcos_marathon%22%20%3E%20dev%2Fnull%202%3E%261%3B%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20while%20%5B%20!%20-f%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20marathon%20%7C%20head%20-1)%2Fdcos.target.wants_master%2Fdcos-marathon.service%20%5D%0A%20%20do%0A%20%20%20%20sleep%202%0A%20%20done%0A%20%20echo%20%22SSLFRAMEWORK%20ENABLED%3A%20Configuring%20Marathon%20Systemd%20Service%20With%20KeyStore%22%0A%20%20sed%20-i%20'%2F--ssl_key%2Fd'%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20marathon%20%7C%20head%20-1)%2Fdcos.target.wants_master%2Fdcos-marathon.service%0A%20%20sed%20-i%20'%2F--mesos_user%2Fi%20%5C%0A%20%20%20%20--ssl_keystore_path%20%5C%2Fetc%5C%2Fethos%5C%2Fmarathon.jks%20%5C%5C%5C%0A%20%20%20%20--ssl_keystore_password%20%22'%22%24MARATHON_SSLKEYSTORE_PASSWORD%22'%22%20%5C%5C'%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20marathon%20%7C%20head%20-1)%2Fdcos.target.wants_master%2Fdcos-marathon.service%0A%20%20chown%20-R%20dcos_marathon%3Adcos_marathon%20%2Fopt%2Fmesosphere%2Fpackages%2F%24(ls%20%2Fopt%2Fmesosphere%2Fpackages%20%7C%20grep%20marathon%20%7C%20head%20-1)%0A%20%20chown%20dcos_marathon%3Adcos_marathon%20%2Fetc%2Fethos%2Fmarathon.env%0A%20%20chown%20dcos_marathon%3Adcos_marathon%20%2Fetc%2Fethos%2Fmarathon.jks%0A%20%20systemctl%20daemon-reload%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
         "path": "/etc/ssh/sshd_config",
         "contents": {
           "source": "data:,%23%20Use%20most%20defaults%20for%20sshd%20configuration.%0AUsePrivilegeSeparation%20sandbox%0ASubsystem%20sftp%20internal-sftp%0AClientAliveInterval%20180%0AUseDNS%20no%0AUsePAM%20yes%0APrintLastLog%20no%20%23%20handled%20by%20PAM%0APrintMotd%20no%20%23%20handled%20by%20PAM%0AAuthorizedKeysCommandUser%20nobody%0AAuthorizedKeysCommand%20%2Fusr%2Fbin%2Fsss_ssh_authorizedkeys%0A",
@@ -166,8 +199,26 @@
           {
             "name": "10-dcos-marathon-framework-auth.conf",
             "contents": "[Unit]\nAfter=ethos-auth.service\n[Service]\nEnvironment=SASL_PATH=/opt/mesosphere/lib/sasl2\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION=\nEnvironment=MARATHON_CMD_MESOS_AUTHENTICATION_SECRET_FILE=/etc/ethos/dcos-marathon-secret\n"
+          },
+          {
+            "name": "11-dcos-marathon-ssl.conf",
+            "contents": "[Unit]\nAfter=dcos-sslframework-setup.service\n[Service]\nExecStartPre=/opt/ethos/bin/dcos-marathon-ssl\n"
           }
         ]
+      },
+      {
+        "name": "dcos-exhibitor.service",
+        "dropins": [
+          {
+            "name": "10-dcos-exhibitor-framework-ssl.conf",
+            "contents": "[Unit]\nAfter=dcos-sslframework-setup.service\n[Service]\nExecStartPre=/opt/ethos/bin/dcos-exhibitor-ssl\n"
+          }
+        ]
+      },
+      {
+        "name": "dcos-sslframework-setup.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=SSLFramework: Setup SSL Framework Communications.\nRequires=dcos-download.service\nAfter=network-online.target\nWants=network-online.target\n[Service]\nUser=root\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStart=/opt/ethos/bin/dcos-sslframework-setup\n[Install]\nWantedBy=multi-user.target\n"
       },
       {
         "name": "format-and-mount-disks.service",
@@ -187,7 +238,7 @@
       {
         "name": "ethos-auth.service",
         "enable": true,
-        "contents": "[Unit]\nDescription=Ethos Setup: Auth Generation\nAfter=network-online.target\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash /opt/ethos/bin/setup-auth-files\n[Install]\nWantedBy=multi-user.target"
+        "contents": "[Unit]\nDescription=Ethos Setup: Auth Generation\nAfter=network-online.target\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash /opt/ethos/bin/setup-auth-files\n[Install]\nWantedBy=multi-user.target\n"
       }
     ]
   },
