@@ -75,7 +75,7 @@ EXISTING_ARTIFACTORY=$(curl --write-out %{http_code} --silent --output /dev/null
 if [[ "$EXISTING_ARTIFACTORY" == "200" ]]; then
 	log "Artifactory Integration exists..."
 else
-	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d  '{"prefixes": [], "auto_pull": false, "auto_pull_time": "03:00", "auto_pull_max": 100, "name": "artifactory-test", "type": "ART", "webhook": {"enabled": false, "url": "", "auth_token": ""}, "url": "$Artifactory_URL", "username": "$Artifactory_USERNAME", "password": "$Artifactory_PASSWORD"}' $WEB_URL/registries
+	curl --silent -H "Accept: application/json" -H "Content-type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d  '{"prefixes": [], "auto_pull": false, "auto_pull_time": "03:00", "auto_pull_max": 100, "name": "artifactory-test", "type": "ART", "webhook": {"enabled": false, "url": "", "auth_token": ""}, "url": "$ARTIFACTORY_URL", "username": "$ARTIFACTORY_USERNAME", "password": "$ARTIFACTORY_PASSWORD"}' $WEB_URL/registries
 fi
 
 GATEWAY_IP=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq ".[] |.id")
