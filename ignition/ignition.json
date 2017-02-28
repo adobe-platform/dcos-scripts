@@ -64,7 +64,7 @@
         "filesystem": "root",
         "path": "/etc/ip_detect",
         "contents": {
-          "source": "data:,%23!%2Fbin%2Fsh%0Aset%20-o%20nounset%20-o%20errexit%0A%0A%23%20Get%20COREOS%20COREOS_PRIVATE_IPV4%0Aif%20%5B%20-e%20%2Fetc%2Fenvironment%20%5D%0Athen%0A%20%20set%20-o%20allexport%0A%20%20.%20%2Fetc%2Fenvironment%0A%20%20set%20%2Bo%20allexport%0Afi%0A%0A%23%20Get%20the%20IP%20address%20of%20the%20interface%20specified%20by%20%241%0Aget_ip_from_interface()%0A%7B%0A%20%20%20%20echo%20%24(ip%20addr%20show%20eth0%20%7C%20grep%20-Eo%20%22(%5B0-9%5D%7B1%2C3%7D%5C.)%7B3%7D%5B0-9%5D%7B1%2C3%7D%22%20%7C%20head%20-1)%0A%7D%0Aecho%20%24%7BCOREOS_PRIVATE_IPV4%3A-%24(get_ip_from_interface%20eth0)%7D%0A",
+          "source": "data:,%23!%2Fbin%2Fsh%0Aset%20-o%20nounset%20-o%20errexit%0A%0A%23%20Get%20COREOS%20COREOS_PRIVATE_IPV4%0Aif%20%5B%20-e%20%2Fetc%2Fenvironment%20%5D%0Athen%0A%20%20set%20-o%20allexport%0A%20%20.%20%2Fetc%2Fenvironment%0A%20%20set%20%2Bo%20allexport%0Afi%0A%0Aecho%20%24%7BCOREOS_PRIVATE_IPV4%3A-%24(ip%20addr%20%7C%20grep%20'state%20UP'%20-A2%20%7C%20tail%20-n1%20%7C%20awk%20'%7Bprint%20%242%7D'%20%7C%20cut%20-f1%20%20-d'%2F')%7D%0A",
           "verification": {}
         },
         "mode": 420,
