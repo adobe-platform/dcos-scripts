@@ -258,7 +258,7 @@
       {
         "name": "ethos-auth.service",
         "enable": true,
-        "contents": "[Unit]\nDescription=Ethos Setup: Auth Generation\nAfter=network-online.target\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash /opt/ethos/bin/setup-auth-files\n[Install]\nWantedBy=multi-user.target\n"
+        "contents": "[Unit]\nDescription=Ethos Setup: Auth Generation\nConditionPathExists=/etc/ethos/auth.env\nAfter=network-online.target\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash /opt/ethos/bin/setup-auth-files\n[Install]\nWantedBy=multi-user.target\n"
       }
     ]
   },
