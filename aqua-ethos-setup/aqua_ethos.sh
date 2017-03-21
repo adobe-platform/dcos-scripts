@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function log {
-	echo $(date -u) "$1" #>> $DIR/aqua_ethos.log
+	echo $(date -u) "$1" >> $DIR/aqua_ethos.log
 }
 
 if [[ -z "$CRED_DIR" ]]; then
