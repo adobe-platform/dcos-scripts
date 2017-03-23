@@ -33,6 +33,18 @@ if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	fi
 fi
 
+if [[ ! -z "$QUALYS_URL" ]]; then
+	if [[ -z "$QUALYS_USERNAME" ]]; then
+		log "Qualys URL set but no QUALYS_USERNAME provided. Exiting..."
+		exit 1
+	fi
+
+	if [[ -z "$QUALYS_PASSWORD" ]]; then
+		log "Qualys URL set but no QUALYS_PASSWORD provided. Exiting..."
+		exit 1
+	fi
+fi
+
 if [[ -z "$HEADER" ]]; then
 	log "HEADER environment variable not provided. Setting to 'Authorization'."
 	HEADER="Authorization"
@@ -52,6 +64,12 @@ if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
 	log "ARTIFACTORY_USERNAME set to $ARTIFACTORY_USERNAME"
 	log "ARTIFACTORY_PASSWORD set to ******"
+fi
+
+if [[ ! -z "$QUALYS_URL" ]]; then
+	log "QUALYS_URL set to $QUALYS_URL"
+	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
+	log "QUALYS_PASSWORD set to ******"
 fi
 
 # Create the cred dir
@@ -132,6 +150,15 @@ else
 	makePost "adminrules" '{"name":"core-user-rule","description": "Core User is Admin of all containers","role":"administrator","resources":{"containers":["*"],"images":["*"],"volumes":["*"],"networks":["*"]},"accessors":{"users":["core"]}}'
 fi
 
+# See if aqua qualys integration already exists
+EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
+
+if [[ "$EXISTING_QUALYS" == "200" ]]; then
+	log "qualys integration exists..."
+else
+	makePost "settings/integrations/qualys" '{ "enabled":true, "url":"$QUALYS_URL", "username":"$QUALYS_USERNAME", "password":"$QUALYS_PASSWORD" }'
+fi
+
 # See if profile already exists
 EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 
@@ -192,6 +219,7 @@ function healthcheck {
 
 	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
+	EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
 
 	if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 		EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-test")
@@ -201,6 +229,7 @@ function healthcheck {
 
 	if [[ "$EXISTING_RULE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
+		  "$EXISTING_QUALYS" == "200" &&
 		  "$EXISTING_ARTIFACTORY" == "200" ]]; then
 		sudo touch $CRED_DIR/healthcheck
 		echo "200"
@@ -216,7 +245,7 @@ while [ $(healthcheck) = "200" ]; do
 	sleep 300
 done
 
-MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE)"
+MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) or integration ($EXISTING_QUALYS)"
 
 if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	MESSAGE="$MESSAGE or Artifactory URL ($EXISTING_ARTIFACTORY)"
