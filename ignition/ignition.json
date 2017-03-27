@@ -143,6 +143,15 @@
         "enable": true
       },
       {
+        "name": "docker.service",
+        "dropins": [
+          {
+            "name": "10-docker-opts.conf",
+            "contents": "[Service]\nEnvironment=\"DOCKER_OPTS=--log-driver=json-file --log-opt max-size=10m --log-opt max-file=3\"\n"
+          }
+        ]
+      },
+      {
         "name": "dcos-link-env.service",
         "enable": true,
         "contents": "[Unit]\nBefore=dcos.target\n[Service]\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStartPre=/usr/bin/mkdir -p /etc/profile.d\nExecStart=/usr/bin/ln -sf /opt/mesosphere/environment.export /etc/profile.d/dcos.sh\n[Install]\nWantedBy=multi-user.target\n"
