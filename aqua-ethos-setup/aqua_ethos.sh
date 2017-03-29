@@ -153,10 +153,12 @@ fi
 # See if aqua qualys integration already exists
 EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
 
+PROFILE_BODY_QUALYS="{\"enabled\": \"true\", \"url\": $QUALYS_URL, \"username\": $QUALYS_USERNAME, \"password\": $QUALYS_PASSWORD}"
+
 if [[ "$EXISTING_QUALYS" == "200" ]]; then
 	log "qualys integration exists..."
 else
-	makePost "settings/integrations/qualys" '{ "enabled":true, "url":"$QUALYS_URL", "username":"$QUALYS_USERNAME", "password":"$QUALYS_PASSWORD" }'
+	makePost "$PROFILE_BODY_QUALYS"
 fi
 
 # See if profile already exists
@@ -219,7 +221,12 @@ function healthcheck {
 
 	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
-	EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
+
+	if [[ ! -z "$QUALYS_URL" ]]; then
+		EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
+	else
+		EXISTING_QUALYS="200"	# Force pass test if not using qualys integration
+	fi
 
 	if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 		EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-test")
@@ -245,7 +252,11 @@ while [ $(healthcheck) = "200" ]; do
 	sleep 300
 done
 
-MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) or integration ($EXISTING_QUALYS)"
+MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE)"
+
+if [[ ! -z "$QUALYS_URL" ]]; then
+	MESSAGE="$MESSAGE or Qualys URL ($EXISTING_QUALYS)"
+fi
 
 if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	MESSAGE="$MESSAGE or Artifactory URL ($EXISTING_ARTIFACTORY)"
