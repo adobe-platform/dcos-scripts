@@ -114,6 +114,28 @@
         "mode": 420,
         "user": {},
         "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/hubble.conf",
+        "contents": {
+          "source": "data:,Z2l0ZnNfcmVtb3RlczoNCiAgLSBodHRwczovL2dpdGh1Yi5jb20vaHViYmxlc3RhY2svaHViYmxlc3RhY2tfZGF0YS5naXQNCmxvZ19maWxlOiAvZGV2L251bGwNCmZpbGVzZXJ2ZXJfYmFja2VuZDoNCiAgLSBnaXQNCiAgLSByb290cw0Kc2NoZWR1bGU6DQogIGF1ZGl0X2RhaWx5Og0KICAgIGZ1bmN0aW9uOiBodWJibGUuYXVkaXQNCiAgICBzZWNvbmRzOiA4NjQwMA0KICAgIHNwbGF5OiAzNjAwDQogICAgcmV0dXJuZXI6IHNwbHVua19ub3ZhX3JldHVybg0KICBuZWJ1bGFfZmlmdGVlbl9taW46DQogICAgZnVuY3Rpb246IG5lYnVsYS5xdWVyaWVzDQogICAgc2Vjb25kczogOTAwDQogICAgc3BsYXk6IDMwMA0KICAgIGFyZ3M6DQogICAgICAtIGZpZnRlZW5fbWluDQogICAgcmV0dXJuZXI6IHNwbHVua19uZWJ1bGFfcmV0dXJuDQogICAgcnVuX29uX3N0YXJ0OiBGYWxzZQ0KICBuZWJ1bGFfaG91cjoNCiAgICBmdW5jdGlvbjogbmVidWxhLnF1ZXJpZXMNCiAgICBzZWNvbmRzOiAzNjAwDQogICAgc3BsYXk6IDkwMA0KICAgIGFyZ3M6DQogICAgICAtIGhvdXINCiAgICByZXR1cm5lcjogc3BsdW5rX25lYnVsYV9yZXR1cm4NCiAgbmVidWxhX2RheToNCiAgICBmdW5jdGlvbjogbmVidWxhLnF1ZXJpZXMNCiAgICBzZWNvbmRzOiA4NjQwMA0KICAgIHNwbGF5OiAzNjAwDQogICAgYXJnczoNCiAgICAgIC0gZGF5DQogICAgcmV0dXJuZXI6IHNwbHVua19uZWJ1bGFfcmV0dXJuDQogIHB1bHNhcjoNCiAgICBmdW5jdGlvbjogcHVsc2FyLnByb2Nlc3MNCiAgICBzZWNvbmRzOiAxDQogICAgcmV0dXJuZXI6IHNwbHVua19wdWxzYXJfcmV0dXJuDQogICAgcnVuX29uX3N0YXJ0OiBUcnVlDQpodWJibGVzdGFjazoNCiAgbm92YToNCiAgICByZXR1cm5lcjoNCiAgICAgIHNwbHVuazoNCiAgICAgICAgdG9rZW46IFNQTFVOS19UT0tFTg0KICAgICAgICBpbmRleGVyOiBoZjAxLmFkb2Jlc2VjYWFzLmNvbQ0KICAgICAgICBzb3VyY2V0eXBlOiBodWJibGVfYXVkaXQNCiAgICAgICAgaW5kZXg6IGh1YmJsZQ0KICBuZWJ1bGE6DQogICAgcmV0dXJuZXI6DQogICAgICBzcGx1bms6DQogICAgICAgIHRva2VuOiBTUExVTktfVE9LRU4NCiAgICAgICAgaW5kZXhlcjogaGYwMS5hZG9iZXNlY2Fhcy5jb20NCiAgICAgICAgc291cmNldHlwZTogaHViYmxlX29zcXVlcnkNCiAgICAgICAgaW5kZXg6IGh1YmJsZQ0KICBwdWxzYXI6DQogICAgcmV0dXJuZXI6DQogICAgICBzcGx1bms6DQogICAgICAgIHRva2VuOiBTUExVTktfVE9LRU4NCiAgICAgICAgaW5kZXhlcjogaGYwMS5hZG9iZXNlY2Fhcy5jb20NCiAgICAgICAgc291cmNldHlwZTogaHViYmxlX2ZpbQ0KICAgICAgICBpbmRleDogaHViYmxlIg0K%0A",
+          "verification": {}
+        },
+        "mode": 384,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/hubble.sh",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Aif%20%5B%20!%20-f%20%2Fopt%2Fhubble%2Fhubble%20%5D%0Athen%0A%20%20wget%20--no-check-certificate%20https%3A%2F%2Fgithub.com%2Fhubblestack%2Fhubble%2Freleases%2Fdownload%2Fv2.1.0%2Fhubble-glibc-2.17.tar.gz%20-O%20%2Ftmp%2Fhubble.tar.gz%0A%20%20tar%20-xvPzf%20%2Ftmp%2Fhubble.tar.gz%0A%20%20cat%20%2Fopt%2Fhubble.conf%20%7C%20base64%20--decode%20%3E%20%2Fetc%2Fhubble%2Fhubble%0A%20%20sed%20-i%20%22s%2FSPLUNK_TOKEN%2F%24HUBBLE_SPLUNK_TOKEN%2Fg%22%20%2Fetc%2Fhubble%2Fhubble%0Afi%0A_ITER%3D3%0A_CHECK_HUBBLE_PROCESS%3D%60ps%20aux%20%7C%20grep%20-i%20hubble%20%7C%20grep%20-v%20grep%20%7C%20wc%20-l%60%0Aif%20%5B%20%20%22%24_CHECK_HUBBLE_PROCESS%22%20%3D%3D%20%220%22%20%5D%0Athen%0A%20%20rm%20-f%20%2Fvar%2Frun%2Fhubble.pid%20%0Afi%0Awhile%20%5B%20%24_ITER%20-gt%200%20%5D%20%26%26%20%5B%20-f%20%2Fvar%2Frun%2Fhubble.pid%20%5D%0Ado%0A%20%20if%20%5B%20-f%20%2Fvar%2Frun%2Fhubble.pid%20%5D%0A%20%20then%0A%20%20%20%20pkill%20hubble%0A%20%20fi%0A%20%20_ITER%3D%24((_ITER-1))%0Adone%0Aif%20%5B%20-f%20%2Fvar%2Frun%2Fhubble.pid%20%5D%0Athen%0A%20%20echo%20%22Did%20not%20start%20hubble%2C%20since%20the%20process%20already%20running%20and%20cannot%20be%20killed%20...%22%20%0Aelse%0A%20%20%2Fopt%2Fhubble%2Fhubble%20-d%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 384,
+        "user": {},
+        "group": {}
       }
     ]
   },
