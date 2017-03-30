@@ -106,7 +106,7 @@ function makeGet {
 }
 
 function makePost {
-	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "$2" "$WEB_URL/$1"
+	curl --silent --output $DIR/aqua_ethos.log -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "$2" "$WEB_URL/$1"
 
 	if [[ "$?" != "0" ]]; then
 		log "Error sending POST to Aqua"
@@ -115,7 +115,7 @@ function makePost {
 }
 
 function makePut {
-	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X PUT -d "$2" "$WEB_URL/$1"
+	curl --silent --output $DIR/aqua_ethos.log -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X PUT -d "$2" "$WEB_URL/$1"
 
 	if [[ "$?" != "0" ]]; then
 		log "Error sending PUT to Aqua"
