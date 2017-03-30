@@ -141,7 +141,7 @@ EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 
 # TODO: check for same env var enc status
 
-PROFILE_BODY="{\"name\": \"Ethos\", \"type\": \"security.profile\", \"description\": \"Ethos Default RunTime Profile\", \"encrypt_all_envs\": $ENC_ENV_VARS, \"seccomp_profile\": $SECCOMP_PROFILE_JSON}"
+PROFILE_BODY="{\"name\": \"Ethos\", \"type\": \"security.profile\", \"description\": \"Ethos Default RunTime Profile\", \"encrypt_all_envs\": $ENC_ENV_VARS, \"seccomp_profile\": \"$SECCOMP_PROFILE_JSON\"}"
 
 if [[ "$EXISTING_PROFILE" == "200" ]]; then
 	log "Ethos profile exists..."
