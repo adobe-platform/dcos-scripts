@@ -188,12 +188,28 @@ sudo chmod 0755 $CRED_DIR/configs/threat_mitigation.json
 curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d @$CRED_DIR/configs/threat_mitigation.json $WEB_URL/runtime_policy
 sudo rm -rf $CRED_DIR/configs
 
+<<<<<<< HEAD
+#qualys integration API
+curl --silent -H "$HEADER: Bearer $TOKEN" -X PUT -d '{ "enabled":true, "url":"$QUALYS_URL", "username":"$QUALYS_USERNAME", "password":"$QUALYS_PASSWORD" }' $WEB_URL/settings/integrations/qualys
+
+while [[ "$EXISTING_PROFILE" == "200" && "$EXISTING_RULE" == "200" ]]; do
+	log "Profile and rule are still active..."
+
+=======
 # HEALTHCHECK
 function healthcheck {
+>>>>>>> master
 	if [[ $(expr $(date +%s) - $(date +%s -r $CRED_DIR/login)) -gt 1800 ]]; then
 		login
 	fi
 
+<<<<<<< HEAD
+	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/core-user-rule)
+	EXISTING_PROFILE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/securityprofiles/Ethos)
+
+	if [[ "$EXISTING_RULE" == "200" && "$EXISTING_PROFILE" == "200" ]]; then
+		touch $CRED_DIR/healthcheck
+=======
 	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
         EXISTING_SECCOMP_RULE=$(makeGet securityprofiles/defaultseccomp)
@@ -212,6 +228,7 @@ function healthcheck {
 		echo "200"
 	else
 		echo "400"
+>>>>>>> master
 	fi
 }
 
