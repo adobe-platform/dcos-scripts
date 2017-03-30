@@ -2,6 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+
 function log {
 	echo $(date -u) "$1" >> $DIR/aqua_ethos.log
 }
@@ -54,6 +55,25 @@ if [[ -z "$ENC_ENV_VARS" ]]; then
 	log "ENC_ENV_VARS environment variable not provided. Setting to 'true'."
 	ENC_ENV_VARS="true"
 fi
+
+aquaToken=""
+function aqua-curl() {
+  # sometimes Aqua just doesn't respond
+  tries=1
+  maxTries=120
+  while [ -z $aquaToken ] && [ $tries -lt $maxTries ]; do
+    aquaToken=$(curl -s -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}' $aquaURL/api/v1/login | jq -r .token)
+    tries=$(expr $tries + 1)
+    sleep 1
+  done
+
+  if [ -z $aquaToken ]; then
+    echo "Could not authenticate with Aqua! You can try building again or contact an admin."
+    exit 1
+  fi
+
+  curl -s -H "aqua-auth: Bearer $aquaToken" $@
+}
 
 log "CRED_DIR set to $CRED_DIR"
 log "WEB_URL set to $WEB_URL"
@@ -140,6 +160,95 @@ function makePut {
 		exit 1
 	fi
 }
+
+function get_gateway_id {
+    GATEWAY=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq "[.[].id]")
+}
+
+function create_label_if_does_not_exist {
+    CREATE_LABEL=$1
+    ENCODED_LABEL=${CREATE_LABEL// /%20}
+    JQ_LABEL_FILTER='.[] | select([.name=="'$CREATE_LABEL'"] | any) | .name'
+    RESPONSE_LABEL=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/settings/labels | jq "$JQ_LABEL_FILTER")
+    if [ -n "$RESPONSE_LABEL" ]; then
+        log "Label \"$CREATE_LABEL\" already exists."
+    else
+        log "Label \"$CREATE_LABEL\" does not exist, creating it."
+        NEW_LABEL=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X POST $WEB_URL/settings/labels -d "{ \"name\": \"$CREATE_LABEL\" }" | jq ".name")
+        if [ "$NEW_LABEL"="$CREATE_LABEL" ]; then
+            log "Label \"$CREATE_LABEL\" created successfully."
+        fi
+    fi
+
+}
+
+
+function token_has_label {
+    TOKEN_NAME=$1
+    TOKEN_LABEL=$2
+    log "Checking whether token with name \"$TOKEN_NAME\" exists and has the label \"$TOKEN_LABEL\"."
+
+    JQ_FILTER+='.[]  | select([.logicalname == "'$TOKEN_NAME'"] | any)| select([.allowed_labels] | any) | select([.allowed_labels[] == "'$TOKEN_LABEL'"] | any) | .command.default '
+    BATCH_TOKEN_VALUE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/hostsbatch \
+      | jq "$JQ_FILTER")
+
+    if [[ -z "$BATCH_TOKEN_VALUE" ]]; then
+        log "Token \"$TOKEN_NAME\" does not exist with label \"$TOKEN_LABEL\"."
+        return 1
+    else
+        log "Token \"$TOKEN_NAME\" exists with label \"$TOKEN_LABEL\".  Command for agent installs is \"$BATCH_TOKEN_VALUE\"."
+        return 0
+    fi
+}
+
+function add_batch_install_token_with_label {
+
+    ADD_TOKEN_NAME=$1
+    ADD_TOKEN_VALUE=$2
+    SET_TOKEN_LABEL=$3
+
+    get_gateway_id
+
+    create_label_if_does_not_exist "$SET_TOKEN_LABEL"
+
+    HOSTBATCH_RULE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/hostsbatch | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
+    HOSTBATCH_RULE_FINAL=$(echo "${HOSTBATCH_RULE:(-3)}")
+
+    if !(token_has_label "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
+        log "Creating token named \"$ADD_TOKEN_NAME\" with label \"$SET_TOKEN_LABEL\" and token \"$ADD_TOKEN_VALUE\"."
+        TOKEN_PAYLOAD='{"logicalname":"'$ADD_TOKEN_NAME'","token":"'$ADD_TOKEN_VALUE'","description":"Batch install for production hosts.","enforce":true,"allowed_labels":["'$SET_TOKEN_LABEL'"],"allowed_registries":["Docker Hub"],"gateways":'$GATEWAY'}'
+        log "$TOKEN_PAYLOAD"
+        BATCH_TOKEN_RESPONSE=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X POST \
+           -d "$TOKEN_PAYLOAD" \
+            $WEB_URL/hostsbatch)
+        log "$BATCH_TOKEN_RESPONSE"
+        log "Validating that \"$ADD_TOKEN_NAME\" has been created."
+        if !(token_has_label "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
+            log "Token does not have matching label."
+            log "--- Fail ---"
+            exit 1
+        fi
+    fi
+
+}
+
+add_batch_install_token_with_label "production-token" "production-token-value" "production approved"
+
+#scan Admin containers
+
+function url-encode-repo() {
+  imageFullname=$1
+  echo $imageFullname | sed -e 's|/|%2F|g'
+}
+image=kran-test-2:bar
+    AQUA=$WEB_URL/scanner/registry/adobe-artifactory/image/$(url-encode-repo $image)
+    reqRes=$(aqua-curl -X POST "$AQUA/scan")
+    if [ "$(echo $reqRes | jq .code)" = "500" ]; then
+        echo "Failed to trigger scan! Please contact an admin."
+        echo $reqRes | jq .
+        exit 1
+fi
+
 
 # See if rule already exists
 EXISTING_RULE=$(makeGet adminrules/core-user-rule)
