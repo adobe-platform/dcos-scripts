@@ -243,6 +243,7 @@ function healthcheck {
 
 	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
+        EXISTING_SECCOMP_RULE=$(makeGet securityprofiles/defaultseccomp)
 
 	if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 		EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-test")
@@ -252,6 +253,7 @@ function healthcheck {
 
 	if [[ "$EXISTING_RULE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
+		  "$EXISTING_SECCOMP_RULE" == "200" &&
 		  "$EXISTING_ARTIFACTORY" == "200" ]]; then
 		sudo touch $CRED_DIR/healthcheck
 		echo "200"
