@@ -106,7 +106,7 @@ function makeGet {
 }
 
 function makePost {
-	curl --silent --output $DIR/aqua_ethos.log -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "$2" "$WEB_URL/$1"
+	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "$2" "$WEB_URL/$1"
 
 	if [[ "$?" != "0" ]]; then
 		log "Error sending POST to Aqua"
@@ -115,7 +115,7 @@ function makePost {
 }
 
 function makePut {
-	curl --silent --output $DIR/aqua_ethos.log -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X PUT -d "$2" "$WEB_URL/$1"
+	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X PUT -d "$2" "$WEB_URL/$1"
 
 	if [[ "$?" != "0" ]]; then
 		log "Error sending PUT to Aqua"
@@ -141,7 +141,7 @@ EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 
 # TODO: check for same env var enc status
 
-PROFILE_BODY="{\"name\": \"Ethos\", \"type\": \"security.profile\", \"description\": \"Ethos Default RunTime Profile\", \"encrypt_all_envs\": $ENC_ENV_VARS, \"seccomp_profile\": \"$SECCOMP_PROFILE_JSON\"}"
+PROFILE_BODY="{\"name\": \"Ethos\", \"enforce\": true, \"type\": \"security.profile\", \"description\": \"Ethos Default RunTime Profile\", \"encrypt_all_envs\": $ENC_ENV_VARS, \"seccomp_profile\": \"$SECCOMP_PROFILE_JSON\"}"
 
 if [[ "$EXISTING_PROFILE" == "200" ]]; then
 	log "Ethos profile exists..."
