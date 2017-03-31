@@ -152,7 +152,7 @@ function makePut {
 }
 
 function get_gateway_id {
-    GATEWAY=$(curl --silent -H "$HEADER: Bearer $TOKEN" -X GET $WEB_URL/servers| jq "[.[].id]")
+    GATEWAY=$(nakeGET servers body| jq "[.[].id]")
 }
 
 function create_label_if_does_not_exist {
