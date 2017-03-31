@@ -240,14 +240,16 @@ function url-encode-repo() {
   imageFullname=$1
   echo $imageFullname | sed -e 's|/|%2F|g'
 }
-image=kran-test-2:bar
-    AQUA=$WEB_URL/scanner/registry/adobe-artifactory/image/$(url-encode-repo $image)
+
+for image in $artifactoryImages;do
+    AQUA=$aquaURL/api/v1/scanner/registry/adobe-artifactory/image/$(url-encode-repo $image)
     reqRes=$(aqua-curl -X POST "$AQUA/scan")
     if [ "$(echo $reqRes | jq .code)" = "500" ]; then
         echo "Failed to trigger scan! Please contact an admin."
         echo $reqRes | jq .
         exit 1
-fi
+    fi
+done
 
 
 # See if rule already exists
