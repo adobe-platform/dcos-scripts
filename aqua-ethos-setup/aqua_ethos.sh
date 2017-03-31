@@ -289,11 +289,17 @@ else
 fi
 
 # See if profile already exists
+=======
+# See if the seccomp profile already exist else set it
+read -r -d '' SECCOMP_PROFILE_JSON <<'EOF'
+{\n\t\"defaultAction\": \"SCMP_ACT_ERRNO\",\n\t\"syscalls\": [\n\t\t{\n\t\t\t\"names\": [\n\t\t\t\t\"capget\",\n\t\t\t\t\"capset\",\n\t\t\t\t\"chdir\",\n\t\t\t\t\"fchown\",\n\t\t\t\t\"futex\",\n\t\t\t\t\"getdents64\",\n\t\t\t\t\"getpid\",\n\t\t\t\t\"getppid\",\n\t\t\t\t\"lstat\",\n\t\t\t\t\"openat\",\n\t\t\t\t\"prctl\",\n\t\t\t\t\"setgid\",\n\t\t\t\t\"setgroups\",\n\t\t\t\t\"setuid\",\n\t\t\t\t\"stat\",\n\t\t\t\t\"rt_sigaction\",\n\t\t\t\t\"mprotect\",\n\t\t\t\t\"brk\",\n\t\t\t\t\"close\",\n\t\t\t\t\"open\",\n\t\t\t\t\"write\",\n\t\t\t\t\"mmap\",\n\t\t\t\t\"rt_sigprocmask\",\n\t\t\t\t\"sched_getaffinity\",\n\t\t\t\t\"arch_prctl\",\n\t\t\t\t\"access\",\n\t\t\t\t\"getrandom\",\n\t\t\t\t\"sigaltstack\",\n\t\t\t\t\"getrlimit\",\n\t\t\t\t\"set_tid_address\",\n\t\t\t\t\"fstat\",\n\t\t\t\t\"stat\",\n\t\t\t\t\"setsockopt\",\n\t\t\t\t\"read\",\n\t\t\t\t\"openat\",\n\t\t\t\t\"clone\",\n\t\t\t\t\"set_robust_list\",\n\t\t\t\t\"ioctl\",\n\t\t\t\t\"execve\",\n\t\t\t\t\"gettid\",\n\t\t\t\t\"socket\",\n\t\t\t\t\"munmap\",\n\t\t\t\t\"futex\",\n\t\t\t\t\"bind\"\n\t\t\t],\n\t\t\t\"action\": \"SCMP_ACT_ALLOW\",\n\t\t\t\"args\": [],\n\t\t\t\"comment\": \"Necessary syscalls for working of container\",\n\t\t\t\"includes\": {},\n\t\t\t\"excludes\": {}\n\t\t}\n\t]\n}
+EOF
+
 EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 
 # TODO: check for same env var enc status
 
-PROFILE_BODY="{\"name\": \"Ethos\", \"type\": \"security.profile\", \"description\": \"Ethos Default RunTime Profile\", \"encrypt_all_envs\": $ENC_ENV_VARS}"
+PROFILE_BODY="{\"name\": \"Ethos\", \"enforce\": true, \"type\": \"security.profile\", \"description\": \"Ethos Default RunTime Profile\", \"encrypt_all_envs\": $ENC_ENV_VARS, \"seccomp_profile\": \"$SECCOMP_PROFILE_JSON\"}"
 
 if [[ "$EXISTING_PROFILE" == "200" ]]; then
 	log "Ethos profile exists..."
