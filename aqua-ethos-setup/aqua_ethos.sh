@@ -261,6 +261,15 @@ else
 	makePost "adminrules" '{"name":"core-user-rule","description": "Core User is Admin of all containers","role":"administrator","resources":{"containers":["*"],"images":["*"],"volumes":["*"],"networks":["*"]},"accessors":{"users":["core"]}}'
 fi
 
+# See if image assurance exists
+IMAGE_ASSURANCE=$(makeGet image_policy)
+
+if [[ "$IMAGE_ASSURANCE" == "200" ]]; then
+	log "image assurance already exists..."
+else
+	makePost "image_policy" '{"only_registered_images":true,"daily_scan_enabled":true,"daily_scan_time":{"hour":1,"minute":0,"second":0},"average_score_enabled":false,"average_score":7.5,"maximum_score_enabled":false,"maximum_score":8,"author":"system","cves_black_list_enabled":true,"cves_black_list":["CVE-2014-6271","CVE-2014-0160","CVE-2012-1723","CVE-2013-2465","CVE-2016-2842","CVE-2016-2108","CVE-2016-0705"],"allowed_images":[]}'
+fi
+
 # See if aqua qualys integration already exists
 EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
 
@@ -331,6 +340,7 @@ function healthcheck {
 	fi
 
 	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
+	IMAGE_ASSURANCE=$(makeGet image_policy)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 
 	if [[ ! -z "$QUALYS_URL" ]]; then
@@ -346,6 +356,7 @@ function healthcheck {
 	fi
 
 	if [[ "$EXISTING_RULE" == "200" &&
+		  "$IMAGE_ASSURANCE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
 		  "$EXISTING_QUALYS" == "200" &&
 		  "$EXISTING_ARTIFACTORY" == "200" ]]; then
@@ -363,7 +374,7 @@ while [ $(healthcheck) = "200" ]; do
 	sleep 300
 done
 
-MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE)"
+MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) or assurance ($IMAGE_ASSURANCE)"
 
 if [[ ! -z "$QUALYS_URL" ]]; then
 	MESSAGE="$MESSAGE or Qualys URL ($EXISTING_QUALYS)"
