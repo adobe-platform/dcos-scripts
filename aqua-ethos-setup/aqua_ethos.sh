@@ -17,6 +17,11 @@ if [[ -z "$WEB_URL" ]]; then
 	exit 1
 fi
 
+if [[ -z "$ARTIFACTORY_IMAGES" ]]; then
+	log "ARTIFACTORY_IMAGES environment variable required. Exiting..."
+	exit 1
+fi
+
 if [[ -z "$PASSWORD" ]]; then
 	log "PASSWORD environment variable required. Exiting..."
 	exit 1
@@ -241,7 +246,9 @@ function url-encode-repo() {
   echo $imageFullname | sed -e 's|/|%2F|g'
 }
 
-for image in $artifactoryImages;do
+#ARTIFACTORY_IMAGES="iam-role-proxy:1.4.0 aws-ecr-login:2.0.0"
+
+for image in $ARTIFACTORY_IMAGES;do
     AQUA=$aquaURL/api/v1/scanner/registry/adobe-artifactory/image/$(url-encode-repo $image)
     reqRes=$(aqua-curl -X POST "$AQUA/scan")
     if [ "$(echo $reqRes | jq .code)" = "500" ]; then
