@@ -199,7 +199,7 @@ function addBatch_install_token_with_label {
 
     if !(tokenHaslabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
         log "Creating token named \"$ADD_TOKEN_NAME\" with label \"$SET_TOKEN_LABEL\" and token \"$ADD_TOKEN_VALUE\"."
-        TOKEN_PAYLOAD='{"logicalname":"'$ADD_TOKEN_NAME'","token":"'$ADD_TOKEN_VALUE'","description":"Batch install for production hosts.","enforce":true,"allowed_labels":["'$SET_TOKEN_LABEL'"],"allowed_registries":["Docker Hub"],"gateways":"'$GATEWAY'"}'
+        TOKEN_PAYLOAD='{"logicalname":"'$ADD_TOKEN_NAME'","token":"'$ADD_TOKEN_VALUE'","description":"Batch install for production hosts.","enforce":true,"allowed_labels":["'$SET_TOKEN_LABEL'"],"allowed_registries":["JFrog Artifactory"],"gateways":"'$GATEWAY'"}'
         log "$TOKEN_PAYLOAD"
         BATCH_TOKEN_RESPONSE=$(makePost hostbatch "$TOKEN_PAYLOAD")
         log "$BATCH_TOKEN_RESPONSE"
@@ -230,6 +230,7 @@ if [[ -z "$ARTIFACTORY_IMAGES" ]]; then
 else
       for image in $ARTIFACTORY_IMAGES;do
            makePost scanner/registry/adobe-artifactory/image/$(urlEncoderepo $image)/scan
+           makePost "settings/labels/production%20approved/attach"  '{"id": ["adobe-artifactory","'$(urlEncoderepo $image)'"], "type": "image"}'
       done
 fi
 
