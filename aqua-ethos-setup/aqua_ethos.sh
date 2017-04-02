@@ -17,11 +17,6 @@ if [[ -z "$WEB_URL" ]]; then
 	exit 1
 fi
 
-if [[ -z "$ARTIFACTORY_IMAGES" ]]; then
-	log "ARTIFACTORY_IMAGES environment variable not set. Exiting..."
-	exit 1
-fi
-
 if [[ -z "$PASSWORD" ]]; then
 	log "PASSWORD environment variable required. Exiting..."
 	exit 1
@@ -229,10 +224,14 @@ function urlEncoderepo() {
 
 #ARTIFACTORY_IMAGES="iam-role-proxy:1.4.0 aws-ecr-login:2.0.0"
 
-for image in $ARTIFACTORY_IMAGES;do
-    AQUA=$aquaURL/api/v1/scanner/registry/adobe-artifactory/image/$(urlEncoderepo $image)
-    makePost scanner/registry/adobe-artifactory/image/$(urlEncoderepo $image)/scan
-done
+if [[ -z "$ARTIFACTORY_IMAGES" ]]; then
+    log "ARTIFACTORY_IMAGES environment variable not set. Exiting..."
+    exit 1
+else
+      for image in $ARTIFACTORY_IMAGES;do
+           makePost scanner/registry/adobe-artifactory/image/$(urlEncoderepo $image)/scan
+      done
+fi
 
 
 # See if rule already exists
