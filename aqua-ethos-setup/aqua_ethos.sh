@@ -152,7 +152,6 @@ function getGatewayId {
 
 function createLabelIfDoesNotExist {
     CREATE_LABEL=$1
-    ENCODED_LABEL=${CREATE_LABEL// /%20}
     JQ_LABEL_FILTER='.[] | select([.name=="'$CREATE_LABEL'"] | any) | .name'
     RESPONSE_LABEL=$(makeGet settings/labels body  | jq "$JQ_LABEL_FILTER")
     if [ -n "$RESPONSE_LABEL" ]; then
@@ -255,7 +254,7 @@ fi
 # See if aqua qualys integration already exists
 EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
 
-PROFILE_BODY_QUALYS="{\"enabled\": \"true\", \"url\": $QUALYS_URL, \"username\": $QUALYS_USERNAME, \"password\": $QUALYS_PASSWORD}"
+PROFILE_BODY_QUALYS="{\"enabled\": \"true\", \"url\": \"$QUALYS_URL\", \"username\": \"$QUALYS_USERNAME\", \"password\": \"$QUALYS_PASSWORD\"}"
 
 if [[ "$EXISTING_QUALYS" == "200" ]]; then
 	log "qualys integration exists..."
