@@ -146,11 +146,11 @@ function makePut {
 	fi
 }
 
-function getGatewayid {
-    GATEWAY=$(makeGET servers body| jq "[.[].id]")
+function getGatewayId {
+    GATEWAY=$(makeGet servers body| jq "[.[].id]")
 }
 
-function createLabel_if_does_not_exist {
+function createLabelIfDoesNotExist {
     CREATE_LABEL=$1
     ENCODED_LABEL=${CREATE_LABEL// /%20}
     JQ_LABEL_FILTER='.[] | select([.name=="'$CREATE_LABEL'"] | any) | .name'
@@ -168,7 +168,7 @@ function createLabel_if_does_not_exist {
 }
 
 
-function tokenHaslabel {
+function tokenHasLabel {
     TOKEN_NAME=$1
     TOKEN_LABEL=$2
     log "Checking whether token with name \"$TOKEN_NAME\" exists and has the label \"$TOKEN_LABEL\"."
@@ -184,27 +184,27 @@ function tokenHaslabel {
     fi
 }
 
-function addBatch_install_token_with_label {
+function addBatchInstallTokenWithLabel {
 
     ADD_TOKEN_NAME=$1
     ADD_TOKEN_VALUE=$2
     SET_TOKEN_LABEL=$3
 
-    getGatewayid
+    getGatewayId
 
-    createLabel_if_does_not_exist "$SET_TOKEN_LABEL"
+    createLabelIfDoesNotExist "$SET_TOKEN_LABEL"
 
     HOSTBATCH_RULE=$(makeGet hostsbatch body | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
     HOSTBATCH_RULE_FINAL=$(echo "${HOSTBATCH_RULE:(-3)}")
 
-    if !(tokenHaslabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
+    if !(tokenHasLabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
         log "Creating token named \"$ADD_TOKEN_NAME\" with label \"$SET_TOKEN_LABEL\" and token \"$ADD_TOKEN_VALUE\"."
         TOKEN_PAYLOAD='{"logicalname":"'$ADD_TOKEN_NAME'","token":"'$ADD_TOKEN_VALUE'","description":"Batch install for production hosts.","enforce":true,"allowed_labels":["'$SET_TOKEN_LABEL'"],"allowed_registries":["JFrog Artifactory"],"gateways":"'$GATEWAY'"}'
         log "$TOKEN_PAYLOAD"
         BATCH_TOKEN_RESPONSE=$(makePost hostbatch "$TOKEN_PAYLOAD")
         log "$BATCH_TOKEN_RESPONSE"
         log "Validating that \"$ADD_TOKEN_NAME\" has been created."
-        if !(tokenHaslabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
+        if !(tokenHasLabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
             log "Token does not have matching label."
             log "--- Fail ---"
             exit 1
@@ -213,24 +213,23 @@ function addBatch_install_token_with_label {
 
 }
 
-addBatch_install_token_with_label "production-token" "production-token-value" "production approved"
+addBatchInstallTokenWithLabel "production-token" "production-token-value" "production approved"
 
 #scan Admin containers
 
-function urlEncoderepo() {
-  imageFullname=$1
-  echo $imageFullname | sed -e 's|/|%2F|g'
+function urlEncodeRepo() {
+  imageFullName=$1
+  echo $imageFullName | sed -e 's|/|%2F|g'
 }
 
 #ARTIFACTORY_IMAGES="iam-role-proxy:1.4.0 aws-ecr-login:2.0.0"
 
 if [[ -z "$ARTIFACTORY_IMAGES" ]]; then
-    log "ARTIFACTORY_IMAGES environment variable not set. Exiting..."
-    exit 1
+    log "ARTIFACTORY_IMAGES environment variable not set and is optional so ignoring"
 else
       for image in $ARTIFACTORY_IMAGES;do
-           makePost scanner/registry/adobe-artifactory/image/$(urlEncoderepo $image)/scan
-           makePost "settings/labels/production%20approved/attach"  '{"id": ["adobe-artifactory","'$(urlEncoderepo $image)'"], "type": "image"}'
+           makePost scanner/registry/adobe-artifactory/image/$(urlEncodeRepo $image)/scan
+           makePost "settings/labels/production%20approved/attach"  '{"id": ["adobe-artifactory","'$(urlEncodeRepo $image)'"], "type": "image"}'
       done
 fi
 
