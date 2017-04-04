@@ -108,7 +108,7 @@
         "filesystem": "root",
         "path": "/etc/ip_detect",
         "contents": {
-          "source": "data:,%23!%2Fbin%2Fsh%0Aset%20-o%20nounset%20-o%20errexit%0A%0A%23%20Get%20COREOS%20COREOS_PRIVATE_IPV4%0Aif%20%5B%20-e%20%2Fetc%2Fenvironment%20%5D%0Athen%0A%20%20set%20-o%20allexport%0A%20%20.%20%2Fetc%2Fenvironment%0A%20%20set%20%2Bo%20allexport%0Afi%0A%0Aecho%20%24%7BCOREOS_PRIVATE_IPV4%3A-%24(ip%20addr%20%7C%20grep%20'state%20UP'%20-A2%20%7C%20tail%20-n1%20%7C%20awk%20'%7Bprint%20%242%7D'%20%7C%20cut%20-f1%20%20-d'%2F')%7D%0A",
+          "source": "data:,%23!%2Fbin%2Fsh%0Aset%20-o%20nounset%20-o%20errexit%0Aif%20%5B%20-e%20%2Fetc%2Fenvironment%20%5D%0Athen%0A%20%20set%20-o%20allexport%0A%20%20.%20%2Fetc%2Fenvironment%0A%20%20set%20%2Bo%20allexport%0Afi%0Aecho%20%24%7BCOREOS_PRIVATE_IPV4%3A-%24(ip%20-o%20-4%20address%20show%20dev%20%24INTERFACE_NAME%20up%20%7C%20awk%20'%7Bprint%20%244%7D'%20%7C%20cut%20-f1%20-d'%2F')%7D%0A",
           "verification": {}
         },
         "mode": 420,
@@ -279,7 +279,7 @@
       {
         "name": "dcos-config-writer.service",
         "enable": true,
-        "contents": "[Unit]\nRequires=dcos-ip-detect.service\nAfter=dcos-ip-detect.service\nConditionPathExists=/etc/mesosphere/roles/azure\n[Service]\nType=oneshot\nEnvironmentFile=/etc/environment\nEnvironmentFile=/opt/mesosphere/environment\nExecStart=/usr/bin/bash -c \"echo $(detect_ip) $(hostname) \\u003e /etc/hosts\"\n[Install]\nWantedBy=multi-user.target\n"
+        "contents": "[Unit]\nRequires=dcos-ip-detect.service\nAfter=dcos-ip-detect.service\nConditionPathExists=/etc/mesosphere/roles/azure\n[Service]\nType=oneshot\nEnvironmentFile=/etc/environment\nEnvironmentFile=/opt/mesosphere/environment\nEnvironmentFile=/etc/ethos/dcos-ip-detect.env\nExecStart=/usr/bin/bash -c \"echo $(detect_ip) $(hostname) \\u003e /etc/hosts\"\n[Install]\nWantedBy=multi-user.target\n"
       },
       {
         "name": "dcos-ip-detect.service",
