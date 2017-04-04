@@ -1,0 +1,160 @@
+{
+  "integration": {
+    "registries": [
+      {
+        "name": "artifactory-admin",
+        "type": "ART",
+        "description": "",
+        "author": "administrator",
+        "lastupdate": 1491322777,
+        "url": "ETH_ARTIFACTORY_URL",
+        "username": "ETH_ARTIFACTORY_USERNAME",
+        "password": "ETH_ARTIFACTORY_PASSWORD",
+        "auto_pull": false,
+        "auto_pull_time": "03:00",
+        "auto_pull_max": 100,
+        "prefixes": [
+          "ETH_ARTIFACTORY_PREFIX"
+        ],
+        "webhook": {
+          "enabled": false,
+          "url": "",
+          "auth_token": ""
+        }
+      }
+    ],
+    "settings": [
+      {
+        "name": "system",
+        "type": "system",
+        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"cybercenter_address\": \"https://cybercenter3.aquasec.com\", \"display_negligible_cves\": false}"
+      },
+      {
+        "name": "qualys",
+        "type": "integrations",
+        "settings": "{\"url\": \"https://qualysguard.qualys.com/api/2.0/fo/knowledge_base/vuln/\", \"enabled\": true, \"password\": \"ETH_QUALYS_PASSWORD\", \"username\": \"ETH_QUALYS_USERNAME\", \"last_update\": \"2017-04-04\"}"
+      },
+      {
+        "name": "image.policy",
+        "type": "image.policy",
+        "settings": "{\"author\": \"administrator\", \"average_score\": 7.5, \"maximum_score\": 8, \"daily_scan_time\": {\"hour\": 1, \"minute\": 0, \"second\": 0}, \"daily_scan_enabled\": true, \"only_none_root_users\": false, \"average_score_enabled\": false, \"maximum_score_enabled\": false, \"only_registered_images\": true, \"cves_black_list_enabled\": false, \"agent_image_scan_enabled\": false, \"packages_black_list_enabled\": false}"
+      },
+      {
+        "name": "runtime_policy",
+        "type": "runtime.policy",
+        "settings": "{\"enable_fork_guard\": false, \"block_nw_unlink_cont\": true, \"enable_ip_reputation\": false, \"default_security_profile\": \"Ethos\", \"fork_guard_process_limit\": 100, \"enable_port_scan_protection\": false}"
+      }
+    ]
+  },
+  "policies": {
+    "image_assurance": [
+      {
+        "only_registered_images": true,
+        "daily_scan_enabled": true,
+        "daily_scan_time": {
+          "hour": 1,
+          "minute": 0,
+          "second": 0
+        },
+        "average_score_enabled": false,
+        "average_score": 7.5,
+        "maximum_score_enabled": false,
+        "maximum_score": 8,
+        "author": "administrator",
+        "cves_black_list_enabled": false,
+        "packages_black_list_enabled": false,
+        "agent_image_scan_enabled": false,
+        "cves_black_list": [
+          "CVE-2012-1723",
+          "CVE-2013-2465",
+          "CVE-2014-0160",
+          "CVE-2014-6271",
+          "CVE-2016-0705",
+          "CVE-2016-2108",
+          "CVE-2016-2842"
+        ],
+        "packages_black_list": null,
+        "allowed_images": null,
+        "only_none_root_users": false
+      }
+    ],
+    "threat_mitigation": [
+      {
+        "default_security_profile": "Ethos",
+        "enable_fork_guard": false,
+        "fork_guard_process_limit": 100,
+        "enable_ip_reputation": false,
+        "enable_port_scan_protection": false,
+        "block_nw_unlink_cont": true
+      }
+    ],
+    "security_profiles": [
+      {
+        "name": "Ethos",
+        "description": "Ethos Default RunTime Profile",
+        "type": "security.profile",
+        "author": "administrator",
+        "version": "1.0",
+        "lastupdate": 1491322777,
+        "enforce": true,
+        "block_inbound_connections": false,
+        "block_outbound_connections": false,
+        "readonly_root": false,
+        "readonly_files": null,
+        "separate_executables": false,
+        "allow_executables": null,
+        "allow_root_executables": null,
+        "allow_root": true,
+        "block_root": false,
+        "allow_users": null,
+        "memory_limit": {
+          "value": 0,
+          "unit": ""
+        },
+        "cpu_quota": {
+          "value": 0,
+          "unit": ""
+        },
+        "max_processes": 0,
+        "encrypt_all_envs": true,
+        "encrypt_env_vars": null,
+        "exec_lockdown": false,
+        "image_lockdown": false,
+        "prevent_privileged": false,
+        "seccomp_profile": "{\n\t\"defaultAction\": \"SCMP_ACT_ERRNO\",\n\t\"syscalls\": [\n\t\t{\n\t\t\t\"names\": [\n\t\t\t\t\"capget\",\n\t\t\t\t\"capset\",\n\t\t\t\t\"chdir\",\n\t\t\t\t\"fchown\",\n\t\t\t\t\"futex\",\n\t\t\t\t\"getdents64\",\n\t\t\t\t\"getpid\",\n\t\t\t\t\"getppid\",\n\t\t\t\t\"lstat\",\n\t\t\t\t\"openat\",\n\t\t\t\t\"prctl\",\n\t\t\t\t\"setgid\",\n\t\t\t\t\"setgroups\",\n\t\t\t\t\"setuid\",\n\t\t\t\t\"stat\",\n\t\t\t\t\"rt_sigaction\",\n\t\t\t\t\"mprotect\",\n\t\t\t\t\"brk\",\n\t\t\t\t\"close\",\n\t\t\t\t\"open\",\n\t\t\t\t\"write\",\n\t\t\t\t\"mmap\",\n\t\t\t\t\"rt_sigprocmask\",\n\t\t\t\t\"sched_getaffinity\",\n\t\t\t\t\"arch_prctl\",\n\t\t\t\t\"access\",\n\t\t\t\t\"getrandom\",\n\t\t\t\t\"sigaltstack\",\n\t\t\t\t\"getrlimit\",\n\t\t\t\t\"set_tid_address\",\n\t\t\t\t\"fstat\",\n\t\t\t\t\"stat\",\n\t\t\t\t\"setsockopt\",\n\t\t\t\t\"read\",\n\t\t\t\t\"openat\",\n\t\t\t\t\"clone\",\n\t\t\t\t\"set_robust_list\",\n\t\t\t\t\"ioctl\",\n\t\t\t\t\"execve\",\n\t\t\t\t\"gettid\",\n\t\t\t\t\"socket\",\n\t\t\t\t\"munmap\",\n\t\t\t\t\"futex\",\n\t\t\t\t\"bind\"\n\t\t\t],\n\t\t\t\"action\": \"SCMP_ACT_ALLOW\",\n\t\t\t\"args\": [],\n\t\t\t\"comment\": \"Necessary syscalls for working of container\",\n\t\t\t\"includes\": {},\n\t\t\t\"excludes\": {}\n\t\t}\n\t]\n}",
+        "drop_capabilities": null,
+        "volumes": null,
+        "use_host_user": false
+      }
+    ],
+    "container_firewall": [
+      {
+        "name": "default",
+        "type": "access.control",
+        "author": "system",
+        "description": "Network Firewall Default Policy",
+        "lastupdate": 1485779977,
+        "inbound_networks": null,
+        "outbound_networks": [
+          {
+            "port_range": "0-65535",
+            "resource": "0.0.0.0/0",
+            "resource_type": "anywhere",
+            "allow": true
+          }
+        ],
+        "version": "2.0",
+        "block_icmp_ping": false
+      }
+    ]
+  },
+  "images": [],
+  "labels": [
+    {
+      "name": "production approved",
+      "description": "",
+      "created": "2017-04-04T16:29:19.848247Z",
+      "author": "administrator"
+    }
+  ]
+}
