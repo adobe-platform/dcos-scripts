@@ -2,6 +2,7 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+
 function log {
 	echo $(date -u) "$1" >> $DIR/aqua_ethos.log
 }
@@ -33,6 +34,18 @@ if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	fi
 fi
 
+if [[ ! -z "$QUALYS_URL" ]]; then
+	if [[ -z "$QUALYS_USERNAME" ]]; then
+		log "Qualys URL set but no QUALYS_USERNAME provided. Exiting..."
+		exit 1
+	fi
+
+	if [[ -z "$QUALYS_PASSWORD" ]]; then
+		log "Qualys URL set but no QUALYS_PASSWORD provided. Exiting..."
+		exit 1
+	fi
+fi
+
 if [[ -z "$HEADER" ]]; then
 	log "HEADER environment variable not provided. Setting to 'Authorization'."
 	HEADER="Authorization"
@@ -52,6 +65,16 @@ if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
 	log "ARTIFACTORY_USERNAME set to $ARTIFACTORY_USERNAME"
 	log "ARTIFACTORY_PASSWORD set to ******"
+fi
+
+if [[ ! -z "$ARTIFACTORY_IMAGES" ]]; then
+	log "$ARTIFACTORY_IMAGES set to $$ARTIFACTORY_IMAGES"
+fi
+
+if [[ ! -z "$QUALYS_URL" ]]; then
+	log "QUALYS_URL set to $QUALYS_URL"
+	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
+	log "QUALYS_PASSWORD set to ******"
 fi
 
 # Create the cred dir
@@ -123,6 +146,93 @@ function makePut {
 	fi
 }
 
+function getGatewayId {
+    GATEWAY=$(makeGet servers body| jq "[.[].id]")
+}
+
+function createLabelIfDoesNotExist {
+    CREATE_LABEL=$1
+    JQ_LABEL_FILTER='.[] | select([.name=="'$CREATE_LABEL'"] | any) | .name'
+    RESPONSE_LABEL=$(makeGet settings/labels body  | jq "$JQ_LABEL_FILTER")
+    if [ -n "$RESPONSE_LABEL" ]; then
+        log "Label \"$CREATE_LABEL\" already exists."
+    else
+        log "Label \"$CREATE_LABEL\" does not exist, creating it."
+        NEW_LABEL=$(makePost settings/labels "{ \"name\": \"$CREATE_LABEL\" }" | jq ".name")
+        if [ "$NEW_LABEL"="$CREATE_LABEL" ]; then
+            log "Label \"$CREATE_LABEL\" created successfully."
+        fi
+    fi
+
+}
+
+
+function tokenHasLabel {
+    TOKEN_NAME=$1
+    TOKEN_LABEL=$2
+    log "Checking whether token with name \"$TOKEN_NAME\" exists and has the label \"$TOKEN_LABEL\"."
+
+    JQ_FILTER+='.[]  | select([.logicalname == "'$TOKEN_NAME'"] | any)| select([.allowed_labels] | any) | select([.allowed_labels[] == "'$TOKEN_LABEL'"] | any) | .command.default '
+    BATCH_TOKEN_VALUE=$(makeGet hostsbatch body | jq "$JQ_FILTER")
+    if [[ -z "$BATCH_TOKEN_VALUE" ]]; then
+        log "Token \"$TOKEN_NAME\" does not exist with label \"$TOKEN_LABEL\"."
+        return 1
+    else
+        log "Token \"$TOKEN_NAME\" exists with label \"$TOKEN_LABEL\".  Command for agent installs is \"$BATCH_TOKEN_VALUE\"."
+        return 0
+    fi
+}
+
+function addBatchInstallTokenWithLabel {
+
+    ADD_TOKEN_NAME=$1
+    ADD_TOKEN_VALUE=$2
+    SET_TOKEN_LABEL=$3
+
+    getGatewayId
+
+    createLabelIfDoesNotExist "$SET_TOKEN_LABEL"
+
+    HOSTBATCH_RULE=$(makeGet hostsbatch body | jq ".[] |.command|.default"|grep "production-token-value" && echo "200")
+    HOSTBATCH_RULE_FINAL=$(echo "${HOSTBATCH_RULE:(-3)}")
+
+    if !(tokenHasLabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
+        log "Creating token named \"$ADD_TOKEN_NAME\" with label \"$SET_TOKEN_LABEL\" and token \"$ADD_TOKEN_VALUE\"."
+        TOKEN_PAYLOAD='{"logicalname":"'$ADD_TOKEN_NAME'","token":"'$ADD_TOKEN_VALUE'","description":"Batch install for production hosts.","enforce":true,"allowed_labels":["'$SET_TOKEN_LABEL'"],"allowed_registries":["JFrog Artifactory"],"gateways":"'$GATEWAY'"}'
+        log "$TOKEN_PAYLOAD"
+        BATCH_TOKEN_RESPONSE=$(makePost hostbatch "$TOKEN_PAYLOAD")
+        log "$BATCH_TOKEN_RESPONSE"
+        log "Validating that \"$ADD_TOKEN_NAME\" has been created."
+        if !(tokenHasLabel "$ADD_TOKEN_NAME" "$SET_TOKEN_LABEL"); then
+            log "Token does not have matching label."
+            log "--- Fail ---"
+            exit 1
+        fi
+    fi
+
+}
+
+addBatchInstallTokenWithLabel "production-token" "production-token-value" "production approved"
+
+#scan Admin containers
+
+function urlEncodeRepo() {
+  imageFullName=$1
+  echo $imageFullName | sed -e 's|/|%2F|g'
+}
+
+#ARTIFACTORY_IMAGES="iam-role-proxy:1.4.0 aws-ecr-login:2.0.0"
+
+if [[ -z "$ARTIFACTORY_IMAGES" ]]; then
+    log "ARTIFACTORY_IMAGES environment variable not set and is optional so ignoring"
+else
+      for image in $ARTIFACTORY_IMAGES;do
+           makePost scanner/registry/adobe-artifactory/image/$(urlEncodeRepo $image)/scan
+           makePost "settings/labels/production%20approved/attach"  '{"id": ["adobe-artifactory","'$(urlEncodeRepo $image)'"], "type": "image"}'
+      done
+fi
+
+
 # See if rule already exists
 EXISTING_RULE=$(makeGet adminrules/core-user-rule)
 
@@ -130,6 +240,26 @@ if [[ "$EXISTING_RULE" == "200" ]]; then
 	log "core-user-rule exists..."
 else
 	makePost "adminrules" '{"name":"core-user-rule","description": "Core User is Admin of all containers","role":"administrator","resources":{"containers":["*"],"images":["*"],"volumes":["*"],"networks":["*"]},"accessors":{"users":["core"]}}'
+fi
+
+# See if image assurance exists
+IMAGE_ASSURANCE=$(makeGet image_policy)
+
+if [[ "$IMAGE_ASSURANCE" == "200" ]]; then
+	log "image assurance already exists..."
+else
+	makePost "image_policy" '{"only_registered_images":true,"daily_scan_enabled":true,"daily_scan_time":{"hour":1,"minute":0,"second":0},"average_score_enabled":false,"average_score":7.5,"maximum_score_enabled":false,"maximum_score":8,"author":"system","cves_black_list_enabled":true,"cves_black_list":["CVE-2014-6271","CVE-2014-0160","CVE-2012-1723","CVE-2013-2465","CVE-2016-2842","CVE-2016-2108","CVE-2016-0705"],"allowed_images":[]}'
+fi
+
+# See if aqua qualys integration already exists
+EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
+
+PROFILE_BODY_QUALYS="{\"enabled\": \"true\", \"url\": \"$QUALYS_URL\", \"username\": \"$QUALYS_USERNAME\", \"password\": \"$QUALYS_PASSWORD\"}"
+
+if [[ "$EXISTING_QUALYS" == "200" ]]; then
+	log "qualys integration exists..."
+else
+	makePost "settings/integrations/qualys" "$PROFILE_BODY_QUALYS"
 fi
 
 # See if the seccomp profile already exist else set it
@@ -195,7 +325,14 @@ function healthcheck {
 	fi
 
 	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
+	IMAGE_ASSURANCE=$(makeGet image_policy)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
+
+	if [[ ! -z "$QUALYS_URL" ]]; then
+		EXISTING_QUALYS=$(makeGet settings/integrations/qualys)
+	else
+		EXISTING_QUALYS="200"	# Force pass test if not using qualys integration
+	fi
 
 	if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 		EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-test")
@@ -204,7 +341,9 @@ function healthcheck {
 	fi
 
 	if [[ "$EXISTING_RULE" == "200" &&
+		  "$IMAGE_ASSURANCE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
+		  "$EXISTING_QUALYS" == "200" &&
 		  "$EXISTING_ARTIFACTORY" == "200" ]]; then
 		sudo touch $CRED_DIR/healthcheck
 		echo "200"
@@ -220,7 +359,11 @@ while [ $(healthcheck) = "200" ]; do
 	sleep 300
 done
 
-MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE)"
+MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) or assurance ($IMAGE_ASSURANCE)"
+
+if [[ ! -z "$QUALYS_URL" ]]; then
+	MESSAGE="$MESSAGE or Qualys URL ($EXISTING_QUALYS)"
+fi
 
 if [[ ! -z "$ARTIFACTORY_URL" ]]; then
 	MESSAGE="$MESSAGE or Artifactory URL ($EXISTING_ARTIFACTORY)"
