@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_FILE="$DIR/config.json"
 
 function log {
-	echo $(date -u) "$1" #>> $DIR/aqua_ethos.log
+	echo $(date -u) "$1" #>> $DIR/aqua_ethos.log TODO: undo
 }
 
 function setup {
@@ -15,16 +15,10 @@ function setup {
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_USERNAME" ]]; then log "QUALYS_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_PASSWORD" ]]; then log "QUALYS_PASSWORD environment variable required. Exiting..." && exit 1; fi
-	if [[ -z "$APPROVED_IMAGES" ]]; then log "APPROVED_IMAGES environment variable required. Exiting..." && exit 1; fi
 
 	if [[ -z "$HEADER" ]]; then
 		log "HEADER environment variable not provided. Setting to 'Authorization'."
 		HEADER="Authorization"
-	fi
-
-	if [[ -z "$ENC_ENV_VARS" ]]; then
-		log "ENC_ENV_VARS environment variable not provided. Setting to 'true'."
-		ENC_ENV_VARS="true"
 	fi
 
 	ARTIFACTORY_PREFIX=$(echo $ARTIFACTORY_URL | cut -f3 -d'/')
@@ -82,7 +76,17 @@ function makeGet {
 	echo $RES_CODE
 }
 
+function getExistingImages {
+	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
+}
+
+function getFullBackup {
+	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["registries","settings","policy.images_assurance","policy.threat_mitigation","policy.runtime_profile","policy.user_access_control","policy.container_firewall","images","labels","secrets","applications"]')
+}
+
 function replaceConfigs {
+	log "Replacing ETH configs in $CONFIG_FILE"
+
 	# Note: using "@" instead of "/" as delimiter because some expressions contain slashes (URLs)
 	sed -i.bak "s@ETH_ARTIFACTORY_URL@$ARTIFACTORY_URL@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ARTIFACTORY_PREFIX@$ARTIFACTORY_PREFIX@g" "$CONFIG_FILE"
@@ -90,15 +94,21 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ARTIFACTORY_PASSWORD@$ARTIFACTORY_PASSWORD@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_USERNAME@$QUALYS_USERNAME@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_PASSWORD@$QUALYS_PASSWORD@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_ENC_ENV_VARS@$ENC_ENV_VARS@g" "$CONFIG_FILE"
 
 	# Empty out the images array in case it already exists
+	log "Clearing the old images array"
 	cat $CONFIG_FILE | jq '.images |= []' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 
+	log "Adding approved images: $APPROVED_IMAGES"
 	IFS=',' read -ra ADDR <<< "$APPROVED_IMAGES"
 	for IMAGE in "${ADDR[@]}"; do
 		# TODO: SKIP IF ALREADY SCANNED
+		if [[ $EXISTING_IMAGES == *"$IMAGE"* ]]; then
+			log "Image already exists. Skipping: $IMAGE"
+			continue;
+		fi
+
 		REPO=$(echo $IMAGE | cut -d':' -f1)
 
 	    cat $CONFIG_FILE | jq '.images |= .+ [{"Name":"'$IMAGE'","Repository":"'$REPO'","PolicyName":"","Registry":"artifactory-admin","Labels":["production approved"]}]' > $CONFIG_FILE.bak
@@ -109,6 +119,7 @@ function replaceConfigs {
 setup
 waitForWeb
 login
+getExistingImages
 replaceConfigs
 
 # Import the config file
