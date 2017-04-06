@@ -50,7 +50,7 @@
   "policies": {
     "image_assurance": [
       {
-        "only_registered_images": true,
+        "only_registered_images": false,
         "daily_scan_enabled": true,
         "daily_scan_time": {
           "hour": 1,
@@ -99,7 +99,7 @@
         "author": "administrator",
         "version": "1.0",
         "lastupdate": 1487346450,
-        "enforce": false,
+        "enforce": true,
         "block_inbound_connections": false,
         "block_outbound_connections": false,
         "readonly_root": false,

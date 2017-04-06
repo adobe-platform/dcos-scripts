@@ -4,26 +4,32 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_FILE="$DIR/config.json"
 
 function log {
-	echo $(date -u) "$1" #>> $DIR/aqua_ethos.log TODO: undo
+	echo $(date -u) "$1" >> $DIR/aqua_ethos.log
 }
 
 function setup {
 	if [[ -z "$WEB_URL" ]]; then log "WEB_URL environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$HC_DIR" ]]; then log "HC_DIR environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$PASSWORD" ]]; then log "PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_URL" ]]; then log "ARTIFACTORY_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_USERNAME" ]]; then log "ARTIFACTORY_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_USERNAME" ]]; then log "QUALYS_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_PASSWORD" ]]; then log "QUALYS_PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
 
 	if [[ -z "$HEADER" ]]; then
 		log "HEADER environment variable not provided. Setting to 'Authorization'."
 		HEADER="Authorization"
 	fi
 
+	sudo mkdir -p $HC_DIR
+	sudo chown -R $(whoami):$(whoami) $HC_DIR
+
 	ARTIFACTORY_PREFIX=$(echo $ARTIFACTORY_URL | cut -f3 -d'/')
 
 	log "WEB_URL set to $WEB_URL"
+	log "HC_DIR set to $HC_DIR"
 	log "HEADER set to $HEADER"
 	log "PASSWORD set to ******"
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
@@ -32,6 +38,7 @@ function setup {
 	log "ARTIFACTORY_PASSWORD set to ******"
 	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
 	log "QUALYS_PASSWORD set to ******"
+	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 }
 
@@ -94,6 +101,12 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ARTIFACTORY_PASSWORD@$ARTIFACTORY_PASSWORD@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_USERNAME@$QUALYS_USERNAME@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_PASSWORD@$QUALYS_PASSWORD@g" "$CONFIG_FILE"
+	#sed -i.bak "s@ETH_ENCRYPT_ENV_VARS@$ENCRYPT_ENV_VARS@g" "$CONFIG_FILE"
+
+	# Update the encryption mode
+	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
+	cat $CONFIG_FILE | jq '.policies.security_profiles[0].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
+	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Empty out the images array in case it already exists
 	log "Clearing the old images array"
@@ -103,7 +116,6 @@ function replaceConfigs {
 	log "Adding approved images: $APPROVED_IMAGES"
 	IFS=',' read -ra ADDR <<< "$APPROVED_IMAGES"
 	for IMAGE in "${ADDR[@]}"; do
-		# TODO: SKIP IF ALREADY SCANNED
 		if [[ $EXISTING_IMAGES == *"$IMAGE"* ]]; then
 			log "Image already exists. Skipping: $IMAGE"
 			continue;
@@ -139,7 +151,7 @@ function healthcheck {
 	if [[ "$EXISTING_RULE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
 		  "$EXISTING_ARTIFACTORY" == "200" ]]; then
-		sudo touch $DIR/healthcheck
+		sudo touch $HC_DIR/healthcheck
 		echo "200"
 	else
 		echo "400"
@@ -155,5 +167,7 @@ done
 
 MESSAGE="Profile ($EXISTING_PROFILE) or rule ($EXISTING_RULE) or Artifactory URL ($EXISTING_ARTIFACTORY)"
 
-log "$MESSAGE could not be found in Aqua, restarting to ensure compliance..."
+log "$MESSAGE could not be found in Aqua, restarting in 30 seconds to ensure compliance..."
+# Avoids rate limits if the service keeps dying
+sleep 30
 exit 1
