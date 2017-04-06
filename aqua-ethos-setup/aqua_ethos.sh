@@ -4,7 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_FILE="$DIR/config.json"
 
 function log {
-	echo $(date -u) "$1" >> $DIR/aqua_ethos.log
+	echo $(date -u) "$1" #>> $DIR/aqua_ethos.log
 }
 
 function setup {
