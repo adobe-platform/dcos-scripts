@@ -1,10 +1,10 @@
 #!/usr/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CONFIG_FILE="$DIR/config.json"
+LOCAL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CONFIG_FILE="$LOCAL_DIR/config.json"
 
 function log {
-	echo $(date -u) "$1" >> $DIR/stdout
+	echo $(date -u) "$1" >> $LOCAL_DIR/stdout
 }
 
 function setup {
@@ -75,7 +75,7 @@ function login {
 		exit 1
 	fi
 
-	sudo touch $DIR/login
+	sudo touch $LOCAL_DIR/login
 }
 
 function makeGet {
@@ -95,12 +95,12 @@ function replaceConfigs {
 	log "Replacing ETH configs in $CONFIG_FILE"
 
 	# Note: using "@" instead of "/" as delimiter because some expressions contain slashes (URLs)
-	sed -i.bak "s@ETH_ARTIFACTORY_URL@$ARTIFACTORY_URL@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_ARTIFACTORY_PREFIX@$ARTIFACTORY_PREFIX@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_ARTIFACTORY_USERNAME@$ARTIFACTORY_USERNAME@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_ARTIFACTORY_PASSWORD@$ARTIFACTORY_PASSWORD@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_QUALYS_USERNAME@$QUALYS_USERNAME@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_QUALYS_PASSWORD@$QUALYS_PASSWORD@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ARTIFACTORY_URL@${ARTIFACTORY_URL}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ARTIFACTORY_PREFIX@${ARTIFACTORY_PREFIX}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ARTIFACTORY_USERNAME@${ARTIFACTORY_USERNAME}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ARTIFACTORY_PASSWORD@${ARTIFACTORY_PASSWORD}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_QUALYS_USERNAME@${QUALYS_USERNAME}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_QUALYS_PASSWORD@${QUALYS_PASSWORD}@g" "$CONFIG_FILE"
 	#sed -i.bak "s@ETH_ENCRYPT_ENV_VARS@$ENCRYPT_ENV_VARS@g" "$CONFIG_FILE"
 
 	# Update the encryption mode
@@ -140,7 +140,7 @@ curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X
 
 # HEALTHCHECK
 function healthcheck {
-	if [[ $(expr $(date +%s) - $(date +%s -r $DIR/login)) -gt 1800 ]]; then
+	if [[ $(expr $(date +%s) - $(date +%s -r $LOCAL_DIR/login)) -gt 1800 ]]; then
 		login
 	fi
 
