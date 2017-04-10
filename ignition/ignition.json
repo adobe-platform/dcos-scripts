@@ -290,6 +290,11 @@
         "name": "ethos-auth.service",
         "enable": true,
         "contents": "[Unit]\nDescription=Ethos Setup: Auth Generation\nConditionPathExists=/etc/ethos/auth.env\nAfter=network-online.target\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/bash /opt/ethos/bin/setup-auth-files\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "coreos-curl.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Address incompatible libcurl on CoreOS\nRequires=dcos-download.service\nAfter=dcos-download.service\nBefore=dcos-setup.service\n[Service]\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStart=/bin/bash -c 'sed -i s,/usr/bin/curl,/opt/mesosphere/bin/curl, $(find /opt/mesosphere -type f -print0 | xargs -0 fgrep -l /usr/bin/curl) ||:'\n[Install]\nWantedBy=multi-user.target\n"
       }
     ]
   },
