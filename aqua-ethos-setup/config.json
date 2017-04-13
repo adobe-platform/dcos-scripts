@@ -84,7 +84,7 @@
     "threat_mitigation": [
       {
         "default_security_profile": "Ethos",
-        "enable_fork_guard": false,
+        "enable_fork_guard": true,
         "fork_guard_process_limit": 100,
         "enable_ip_reputation": true,
         "enable_port_scan_protection": true,
