@@ -84,6 +84,17 @@
       },
       {
         "filesystem": "root",
+        "path": "/opt/ethos/bin/download-promethos-exporters",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0Ainstall_exporter()%20%7B%0A%20%20mkdir%20-p%20%24(dirname%20%22%242%22)%0A%20%20if%20%5B%20!%20-f%20%22%242%22%20%5D%3B%20then%0A%20%20%20%20echo%20%22Starting%20download%20for%20%241...%22%0A%20%20%20%20curl%20-s%20-o%20%22%242%22%20%22%241%22%0A%20%20%20%20if%20%5B%20%24%3F%20!%3D%200%20%5D%3B%20then%0A%20%20%20%20%20%20echo%20%22A%20problem%20occurred%20when%20downloading%20%241%22%0A%20%20%20%20%20%20return%201%0A%20%20%20%20fi%0A%20%20%20%20if%20%5B%5B%20%24(sha512sum%20%22%242%22%20%7C%20awk%20'%7Bprint%20%241%7D')%20!%3D%20%22%243%22%20%5D%5D%3B%20then%0A%20%20%20%20%20%20echo%20%22SHA512%20hash%20for%20download%20%241%20did%20not%20match%20expected%20hash%22%0A%20%20%20%20%20%20rm%20%22%242%22%0A%20%20%20%20%20%20return%202%0A%20%20%20%20fi%0A%20%20fi%0A%20%20chmod%20755%20%22%242%22%0A%7D%0Aif%20%5B%5B%20%22%24ENABLE_EXPORTERS%22%20%3D%3D%20%22true%22%20%5D%5D%3B%20then%0A%20%20baseurl%3D%22https%3A%2F%2Fethosbinaries.blob.core.windows.net%2Fethos%22%0A%20%20install_exporter%20%22%24%7Bbaseurl%7D%2Fblackbox_exporter_0.4.0%22%20%2Fopt%2Fblackbox_exporter%2Fblackbox_exporter%2021f0624be1e9a55396993522ec40a93aec97f8040f78c3db4132d27618091eb28d737c372c596a7c5e0b05dfa419b022d4e1238c62f5b13fa17a8399d00f068d%0A%20%20install_exporter%20%22%24%7Bbaseurl%7D%2Fnode_exporter_0.14.0%22%20%2Fopt%2Fnode_exporter%2Fnode_exporter%208aa6be677870c8b7dc3c5e1ff5824838c005b5413e2ea7781bd8763ca14c6aba04a0cad4698fc613ef013797821c39405e1566855f0c63495ebb4a2f733f75a7%0A%20%20install_exporter%20%22%24%7Bbaseurl%7D%2Fprocess_exporter_0.1.0%22%20%2Fopt%2Fprocess_exporter%2Fprocess_exporter%2063f74cafe8c08e498ca59592ea51b1a7763af0e3dc58309b63978796091bf5f8161dc8e84421b9dadcbebaa66a872bb46b88b375ed77b4c8e061a95319878216%0A%20%20%23%20CAdvisor%20binary%20built%20by%20Stegen%20Smith%20using%20%60go%20get%60%20due%20to%20traceback%20issues%20with%20upstream%20release%0A%20%20%23%20TODO%20replace%20with%20next%20working%20upstream%20release%0A%20%20install_exporter%20%22%24%7Bbaseurl%7D%2Fcadvisor_0.25.0_adobe%22%20%2Fopt%2Fcadvisor%2Fcadvisor%20b9d11fb11a952e69927219df29078007dcbc53213929cb53bc01d968f27ce6d2562206b72fa0e97386ff911420791297143b89bd435bc4df8e22c7788c62a5e1%0Afi%0A",
+          "verification": {}
+        },
+        "mode": 493,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
         "path": "/etc/ssh/sshd_config",
         "contents": {
           "source": "data:,%23%20Use%20most%20defaults%20for%20sshd%20configuration.%0AUsePrivilegeSeparation%20sandbox%0ASubsystem%20sftp%20internal-sftp%0AClientAliveInterval%20180%0AUseDNS%20no%0AUsePAM%20yes%0APrintLastLog%20no%20%23%20handled%20by%20PAM%0APrintMotd%20no%20%23%20handled%20by%20PAM%0AAuthorizedKeysCommandUser%20nobody%0AAuthorizedKeysCommand%20%2Fusr%2Fbin%2Fsss_ssh_authorizedkeys%0A",
@@ -134,6 +145,28 @@
           "verification": {}
         },
         "mode": 384,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/blackbox_exporter/blackbox.yml",
+        "contents": {
+          "source": "data:,modules%3A%0A%20%20http_2xx%3A%0A%20%20%20%20prober%3A%20http%0A%20%20%20%20timeout%3A%205s%0A%20%20%20%20http%3A%0A%20%20http_post_2xx%3A%0A%20%20%20%20prober%3A%20http%0A%20%20%20%20timeout%3A%205s%0A%20%20%20%20http%3A%0A%20%20%20%20%20%20method%3A%20POST%0A%20%20tcp_connect%3A%0A%20%20%20%20prober%3A%20tcp%0A%20%20%20%20timeout%3A%205s%0A%20%20pop3s_banner%3A%0A%20%20%20%20prober%3A%20tcp%0A%20%20%20%20tcp%3A%0A%20%20%20%20%20%20query_response%3A%0A%20%20%20%20%20%20-%20expect%3A%20%22%5E%2BOK%22%0A%20%20%20%20%20%20tls%3A%20true%0A%20%20%20%20%20%20tls_config%3A%0A%20%20%20%20%20%20%20%20insecure_skip_verify%3A%20false%0A%20%20ssh_banner%3A%0A%20%20%20%20prober%3A%20tcp%0A%20%20%20%20timeout%3A%205s%0A%20%20%20%20tcp%3A%0A%20%20%20%20%20%20query_response%3A%0A%20%20%20%20%20%20-%20expect%3A%20%22%5ESSH-2.0-%22%0A%20%20irc_banner%3A%0A%20%20%20%20prober%3A%20tcp%0A%20%20%20%20timeout%3A%205s%0A%20%20%20%20tcp%3A%0A%20%20%20%20%20%20query_response%3A%0A%20%20%20%20%20%20-%20send%3A%20%22NICK%20prober%22%0A%20%20%20%20%20%20-%20send%3A%20%22USER%20prober%20prober%20prober%20%3Aprober%22%0A%20%20%20%20%20%20-%20expect%3A%20%22PING%20%3A(%5B%5E%20%5D%2B)%22%0A%20%20%20%20%20%20%20%20send%3A%20%22PONG%20%24%7B1%7D%22%0A%20%20%20%20%20%20-%20expect%3A%20%22%5E%3A%5B%5E%20%5D%2B%20001%22%0A%20%20icmp%3A%0A%20%20%20%20prober%3A%20icmp%0A%20%20%20%20timeout%3A%205s%0A",
+          "verification": {}
+        },
+        "mode": 420,
+        "user": {},
+        "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/opt/process_exporter/process_exporter.yml",
+        "contents": {
+          "source": "data:,process_names%3A%0A%20%20-%20comm%3A%0A%20%20%20%20-%20node_exporter%0A%20%20%20%20-%20blackbox_export%0A%20%20%20%20-%20cadvisor%0A%20%20%20%20-%20mesos-exporter%0A%20%20%20%20-%20marathon_export%0A%20%20%20%20-%20process-exporte%0A",
+          "verification": {}
+        },
+        "mode": 420,
         "user": {},
         "group": {}
       }
@@ -295,6 +328,30 @@
         "name": "coreos-curl.service",
         "enable": true,
         "contents": "[Unit]\nDescription=Address incompatible libcurl on CoreOS\nRequires=dcos-download.service\nAfter=dcos-download.service\nBefore=dcos-setup.service\n[Service]\nType=oneshot\nStandardOutput=journal+console\nStandardError=journal+console\nExecStart=/bin/bash -c 'sed -i s,/usr/bin/curl,/opt/mesosphere/bin/curl, $(find /opt/mesosphere -type f -print0 | xargs -0 fgrep -l /usr/bin/curl) ||:'\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "promethos-exporter-setup.service",
+        "contents": "[Unit]\nDescription=Download Prometheus exporters\nConditionFileIsExecutable=|!/opt/blackbox_exporter/blackbox_exporter\nConditionFileIsExecutable=|!/opt/cadvisor/cadvisor\nConditionFileIsExecutable=|!/opt/node_exporter/node_exporter\nConditionFileIsExecutable=|!/opt/process_exporter/process_exporter\nAfter=network-online.target\n[Service]\nType=oneshot\nEnvironmentFile=/etc/ethos/promethos.env\nExecStart=/opt/ethos/bin/download-promethos-exporters\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "blackbox-exporter.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Prometheus Blackbox Exporter Service\nConditionFileIsExecutable=/opt/blackbox_exporter/blackbox_exporter\nAfter=promethos-exporter-setup.service\n[Service]\nType=simple\nRestart=on-failure\nExecStart=/opt/blackbox_exporter/blackbox_exporter -config.file /opt/blackbox_exporter/blackbox.yml\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "cadvisor-exporter.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Prometheus cAdvisor Exporter Service\nConditionFileIsExecutable=/opt/cadvisor/cadvisor\nAfter=promethos-exporter-setup.service\n[Service]\nType=simple\nRestart=on-failure\nExecStart=/opt/cadvisor/cadvisor --housekeeping_interval=30s --global_housekeeping_interval=2m --disable_metrics=disk,tcp --port=9200 --enable_load_reader\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "node-exporter.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Prometheus Node Exporter Service\nConditionFileIsExecutable=/opt/node_exporter/node_exporter\nAfter=promethos-exporter-setup.service\n[Service]\nType=simple\nRestart=on-failure\nExecStart=/opt/node_exporter/node_exporter -collectors.enabled tcpstat,conntrack,diskstats,edac,filefd,filesystem,hwmon,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,time,uname,vmstat\n[Install]\nWantedBy=multi-user.target\n"
+      },
+      {
+        "name": "process-exporter.service",
+        "enable": true,
+        "contents": "[Unit]\nDescription=Prometheus Process Exporter Service\nConditionFileIsExecutable=/opt/process_exporter/process_exporter\nAfter=promethos-exporter-setup.service\n[Service]\nType=simple\nRestart=on-failure\nExecStart=/opt/process_exporter/process_exporter -config.path /opt/process_exporter/process-exporter.yml\n[Install]\nWantedBy=multi-user.target\n"
       }
     ]
   },
