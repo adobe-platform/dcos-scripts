@@ -136,6 +136,17 @@
         "mode": 384,
         "user": {},
         "group": {}
+      },
+      {
+        "filesystem": "root",
+        "path": "/etc/ansible/facts.d/dynamic.fact",
+        "contents": {
+          "source": "data:,%23!%2Fbin%2Fbash%0A%23%20This%20script%20returns%20dynamic%20facts%20to%20Ansible.%0A%23%20Ansible%20requires%20that%20facts%20be%20stored%20as%20static%20.ini%20files%20or%20may%20also%0A%23%20consume%20executable%20files%20that%20return%20JSON%20(such%20as%20this%20one)%0A%0Amesos_slave_common_name%3D%24(cut%20-d%5C%3D%20-f1%20%2Fvar%2Flib%2Fdcos%2Fmesos-slave-common)%0Amesos_slave_common_val%3D%24(cut%20-d%5C%3D%20-f2%20%2Fvar%2Flib%2Fdcos%2Fmesos-slave-common)%0Acat%20%3C%3C%20END%0A%7B%0A%20%20%22%24%7Bmesos_slave_common_name%7D%22%3A%22%24%7Bmesos_slave_common_val%7D%22%0A%7D%0AEND%0A",
+          "verification": {}
+        },
+        "mode": 365,
+        "user": {},
+        "group": {}
       }
     ]
   },
