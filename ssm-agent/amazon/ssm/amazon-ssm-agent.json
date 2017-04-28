@@ -1,0 +1,33 @@
+{
+    "Profile":{
+        "ProfilePath" : "",
+        "ProfileName" : "",
+        "ShareCreds" : true,
+        "ShareProfile" : ""
+    },
+    "Mds": {
+        "CommandWorkersLimit" : 5,
+        "StopTimeoutMillis" : 20000,
+        "Endpoint": "",
+        "CommandRetryLimit": 15
+    },
+    "Ssm": {
+        "Endpoint": "",
+        "HealthFrequencyMinutes": 5,
+        "CustomInventoryDefaultLocation" : ""
+    },
+    "Agent": {
+        "Region": "",
+        "OrchestrationRootDir": ""
+    },
+    "Os": {
+        "Lang": "en-US",
+        "Name": "",
+        "Version": "1"
+    },
+    "S3": {
+        "Region": "",
+        "LogBucket":"",
+        "LogKey":""
+    }
+}
