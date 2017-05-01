@@ -48,6 +48,7 @@ function waitForWeb {
 
 	while [[ -z $WEB_ACTIVE ]]; do
 	  log "Waiting for web UI to become active"
+	  log "$WEB_ACTIVE"
 	  WEB_ACTIVE=$(curl --silent $WEB_URL)
 	  sleep 5;
 	done
