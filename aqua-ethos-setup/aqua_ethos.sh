@@ -79,16 +79,16 @@ function login {
 }
 
 function makeGet {
-	RES_CODE=$(/opt/mesosphere/bin/curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/$1)
+	RES_CODE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/$1)
 	echo $RES_CODE
 }
 
 function getExistingImages {
-	EXISTING_IMAGES=$(/opt/mesosphere/bin/curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
+	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
 }
 
 function getFullBackup {
-	EXISTING_IMAGES=$(/opt/mesosphere/bin/curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["registries","settings","policy.images_assurance","policy.threat_mitigation","policy.runtime_profile","policy.user_access_control","policy.container_firewall","images","labels","secrets","applications"]')
+	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["registries","settings","policy.images_assurance","policy.threat_mitigation","policy.runtime_profile","policy.user_access_control","policy.container_firewall","images","labels","secrets","applications"]')
 }
 
 function replaceConfigs {
@@ -144,7 +144,7 @@ function healthcheck {
 		login
 	fi
 
-	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
+	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/ethos)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 	EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-admin")
 
