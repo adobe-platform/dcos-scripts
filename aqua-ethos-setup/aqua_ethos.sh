@@ -144,7 +144,7 @@ function healthcheck {
 		login
 	fi
 
-	EXISTING_RULE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/adminrules/ethos)
+	EXISTING_RULE=$(makeGet adminrules/ethos)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 	EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-admin")
 
