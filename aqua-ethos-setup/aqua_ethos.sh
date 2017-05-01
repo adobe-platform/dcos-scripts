@@ -7,6 +7,11 @@ function log {
 	echo $(date -u) "$1" >> $LOCAL_DIR/stdout
 }
 
+function curl {
+	# This function is needed to work on latest CoreOS
+	/opt/mesosphere/bin/curl $@
+}
+
 function setup {
 	if [[ -z "$WEB_URL" ]]; then log "WEB_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$HC_DIR" ]]; then log "HC_DIR environment variable required. Exiting..." && exit 1; fi
@@ -48,7 +53,6 @@ function waitForWeb {
 
 	while [[ -z $WEB_ACTIVE ]]; do
 	  log "Waiting for web UI to become active"
-	  curl -vvv $WEB_URL
 	  WEB_ACTIVE=$(curl --silent $WEB_URL)
 	  sleep 5;
 	done
