@@ -7,11 +7,6 @@ function log {
 	echo $(date -u) "$1" >> $LOCAL_DIR/stdout
 }
 
-function curl {
-	# This function is needed to work on latest CoreOS
-	/opt/mesosphere/bin/curl $@
-}
-
 function setup {
 	if [[ -z "$WEB_URL" ]]; then log "WEB_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$HC_DIR" ]]; then log "HC_DIR environment variable required. Exiting..." && exit 1; fi
@@ -62,7 +57,7 @@ function waitForWeb {
 function login {
 	TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
 
-	if [[ -z "$TOKEN_RESP" ]]; then
+	if [[ -z "$TOKEN_RESP" || "$?" != "0" ]]; then
 		log "$TOKEN_RESP"
 		log "Unable to login. Exiting..."
 		exit 1
@@ -84,16 +79,16 @@ function login {
 }
 
 function makeGet {
-	RES_CODE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/$1)
+	RES_CODE=$(/opt/mesosphere/bin/curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/$1)
 	echo $RES_CODE
 }
 
 function getExistingImages {
-	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
+	EXISTING_IMAGES=$(/opt/mesosphere/bin/curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
 }
 
 function getFullBackup {
-	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["registries","settings","policy.images_assurance","policy.threat_mitigation","policy.runtime_profile","policy.user_access_control","policy.container_firewall","images","labels","secrets","applications"]')
+	EXISTING_IMAGES=$(/opt/mesosphere/bin/curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["registries","settings","policy.images_assurance","policy.threat_mitigation","policy.runtime_profile","policy.user_access_control","policy.container_firewall","images","labels","secrets","applications"]')
 }
 
 function replaceConfigs {
