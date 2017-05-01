@@ -144,7 +144,7 @@ function healthcheck {
 		login
 	fi
 
-	EXISTING_RULE=$(makeGet adminrules/core-user-rule)
+	EXISTING_RULE=$(makeGet adminrules/ethos)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
 	EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-admin")
 
