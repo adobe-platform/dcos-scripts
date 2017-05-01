@@ -62,7 +62,7 @@ function waitForWeb {
 function login {
 	TOKEN_RESP=$(curl --silent "$WEB_URL/login" -H 'Content-Type: application/json' --data-binary '{"id":"administrator","password":"'$PASSWORD'"}')
 
-	if [[ -z "$TOKEN_RESP" || "$?" != "0" ]]; then
+	if [[ -z "$TOKEN_RESP"]]; then
 		log "$TOKEN_RESP"
 		log "Unable to login. Exiting..."
 		exit 1
