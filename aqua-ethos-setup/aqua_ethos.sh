@@ -11,6 +11,7 @@ function setup {
 	if [[ -z "$WEB_URL" ]]; then log "WEB_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$HC_DIR" ]]; then log "HC_DIR environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$PASSWORD" ]]; then log "PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$FD_PASSWORD" ]]; then log "FD_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_URL" ]]; then log "ARTIFACTORY_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_USERNAME" ]]; then log "ARTIFACTORY_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
@@ -32,6 +33,7 @@ function setup {
 	log "HC_DIR set to $HC_DIR"
 	log "HEADER set to $HEADER"
 	log "PASSWORD set to ******"
+	log "FD_PASSWORD set to ******"
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
 	log "ARTIFACTORY_PREFIX set to $ARTIFACTORY_PREFIX"
 	log "ARTIFACTORY_USERNAME set to $ARTIFACTORY_USERNAME"
@@ -138,8 +140,13 @@ replaceConfigs
 curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "@$CONFIG_FILE" "$WEB_URL/settings/import"
 
 # Add Flight Director User
-curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"id": "flight-director","name": "Flight Director","password": "'$PASSWORD'","email": "","admin":true,"role":"administrator"}' $WEB_URL/users
+FD_USER=$(makeGet users/flight-director)
 
+if [[ "$FD_USER" == "200" ]]; then
+		echo "200"
+	else
+		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"id": "flight-director","name": "Flight Director","password": "'$FD_PASSWORD'","email": "","admin":true,"role":"administrator"}' $WEB_URL/users
+fi
 
 # HEALTHCHECK
 function healthcheck {
