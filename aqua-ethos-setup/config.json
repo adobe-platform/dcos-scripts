@@ -22,6 +22,27 @@
           "url": "",
           "auth_token": ""
         }
+      },
+      {
+        "name": "ecr-client",
+        "type": "AWS",
+        "description": "",
+        "author": "administrator",
+        "lastupdate": 1494351625,
+        "url": "ETH_ECR_REGION",
+        "username": "ETH_ECR_USERNAME",
+        "password": "ETH_ECR_PASSWORD",
+        "auto_pull": false,
+        "auto_pull_time": "03:00",
+        "auto_pull_max": 100,
+        "prefixes": [
+          "ETH_ECR_PREFIX"
+        ],
+        "webhook": {
+          "enabled": false,
+          "url": "",
+          "auth_token": ""
+        }
       }
     ],
     "settings": [
@@ -50,7 +71,7 @@
   "policies": {
     "image_assurance": [
       {
-        "only_registered_images": false,
+        "only_registered_images": true,
         "daily_scan_enabled": true,
         "daily_scan_time": {
           "hour": 1,
@@ -67,6 +88,11 @@
         "agent_image_scan_enabled": false,
         "only_none_root_users": false,
         "trusted_base_images_enabled": false,
+        "allow_images_with_prefixes": [
+          "ETH_ARTIFACTORY_PREFIX",
+          "ETH_ECR_PREFIX"
+        ],
+        "allow_images_docker_labels": [],
         "cves_black_list": [
           "CVE-2012-1723",
           "CVE-2013-2465",
@@ -151,7 +177,7 @@
       }
     ],
     "user_access_control": [
-      "{\"name\": \"ethos\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.0\", \"accessors\": {\"users\": [\"core\"], \"groups\": [\"core\"]}, \"resources\": {\"apps\": [\"*\"], \"nodes\": [\"*\"], \"images\": [\"*\"], \"secrets\": [\"*\"], \"volumes\": [\"*\"], \"networks\": [\"*\"], \"services\": [\"*\"], \"containers\": [\"*\"], \"aqua_labels\": [\"*\"]}, \"lastupdate\": 1491249828, \"description\": \"\"}"
+      "{\"name\": \"ethos\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.0\", \"accessors\": {\"users\": [ETH_DOCKER_ADMINS], \"groups\": [\"core\"]}, \"resources\": {\"apps\": [\"*\"], \"nodes\": [\"*\"], \"images\": [\"*\"], \"secrets\": [\"*\"], \"volumes\": [\"*\"], \"networks\": [\"*\"], \"services\": [\"*\"], \"containers\": [\"*\"], \"aqua_labels\": [\"*\"]}, \"lastupdate\": 1491249828, \"description\": \"\"}"
     ]
   },
   "images": [],

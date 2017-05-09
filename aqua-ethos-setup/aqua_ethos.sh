@@ -14,6 +14,9 @@ function setup {
 	if [[ -z "$ARTIFACTORY_URL" ]]; then log "ARTIFACTORY_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_USERNAME" ]]; then log "ARTIFACTORY_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$ECR_URL" ]]; then log "ECR_URL environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$ECR_USERNAME" ]]; then log "ECR_USERNAME environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$ECR_PASSWORD" ]]; then log "ECR_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_USERNAME" ]]; then log "QUALYS_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_PASSWORD" ]]; then log "QUALYS_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
@@ -23,10 +26,20 @@ function setup {
 		HEADER="Authorization"
 	fi
 
+	if [[ -z "$DOCKER_ADMINS" ]]; then
+		log "DOCKER_ADMINS environment variable not provided. Setting to 'core'"
+		DOCKER_ADMINS="\"core\""
+	else
+		REPLACED_ADMINS="${DOCKER_ADMINS//,/\\",\\"}"
+		DOCKER_ADMINS="\\\"$REPLACED_ADMINS\\\""
+	fi
+
 	sudo mkdir -p $HC_DIR
 	sudo chown -R $(whoami):$(whoami) $HC_DIR
 
 	ARTIFACTORY_PREFIX=$(echo $ARTIFACTORY_URL | cut -f3 -d'/')
+	ECR_PREFIX=$(echo $ECR_URL | cut -f3 -d'/')
+	ETH_ECR_REGION=$(echo $ECR_URL | cut -f4 -d'.')
 
 	log "WEB_URL set to $WEB_URL"
 	log "HC_DIR set to $HC_DIR"
@@ -36,10 +49,16 @@ function setup {
 	log "ARTIFACTORY_PREFIX set to $ARTIFACTORY_PREFIX"
 	log "ARTIFACTORY_USERNAME set to $ARTIFACTORY_USERNAME"
 	log "ARTIFACTORY_PASSWORD set to ******"
+	log "ECR_URL set to $ECR_URL"
+	log "ECR_PREFIX set to $ECR_PREFIX"
+	log "ECR_REGION set to $ECR_REGION"
+	log "ECR_USERNAME set to $ECR_USERNAME"
+	log "ECR_PASSWORD set to ******"
 	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
 	log "QUALYS_PASSWORD set to ******"
 	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
+	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
 }
 
 function waitForWeb {
@@ -101,7 +120,13 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ARTIFACTORY_PASSWORD@${ARTIFACTORY_PASSWORD}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_USERNAME@${QUALYS_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_PASSWORD@${QUALYS_PASSWORD}@g" "$CONFIG_FILE"
-	#sed -i.bak "s@ETH_ENCRYPT_ENV_VARS@$ENCRYPT_ENV_VARS@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_DOCKER_ADMINS@${DOCKER_ADMINS}@g" "$CONFIG_FILE"
+	
+	sed -i.bak "s@ETH_ECR_URL@${ECR_URL}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ECR_PREFIX@${ECR_PREFIX}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ECR_REGION@${ECR_REGION}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ECR_USERNAME@${ECR_USERNAME}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_ECR_PASSWORD@${ECR_PASSWORD}@g" "$CONFIG_FILE"
 
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
