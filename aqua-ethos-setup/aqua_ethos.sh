@@ -20,6 +20,9 @@ function setup {
 	if [[ -z "$ECR_PASSWORD" ]]; then log "ECR_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_USERNAME" ]]; then log "QUALYS_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_PASSWORD" ]]; then log "QUALYS_PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$SPLUNK_URL" ]]; then log "SPLUNK_URL environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$SPLUNK_INDEX" ]]; then log "SPLUNK_INDEX environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$SPLUNK_TOKEN" ]]; then log "SPLUNK_TOKEN environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
 
 	if [[ -z "$HEADER" ]]; then
@@ -58,6 +61,9 @@ function setup {
 	log "ECR_PASSWORD set to ******"
 	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
 	log "QUALYS_PASSWORD set to ******"
+	log "SPLUNK_URL set to $SPLUNK_URL"
+	log "SPLUNK_INDEX set to $SPLUNK_INDEX"
+	log "SPLUNK_TOKEN set to ******"
 	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
@@ -122,8 +128,11 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ARTIFACTORY_PASSWORD@${ARTIFACTORY_PASSWORD}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_USERNAME@${QUALYS_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_QUALYS_PASSWORD@${QUALYS_PASSWORD}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_SPLUNK_URL@${SPLUNK_URL}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_SPLUNK_INDEX@${SPLUNK_INDEX}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_SPLUNK_TOKEN@${SPLUNK_TOKEN}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_DOCKER_ADMINS@${DOCKER_ADMINS}@g" "$CONFIG_FILE"
-	
+
 	sed -i.bak "s@ETH_ECR_URL@${ECR_URL}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_PREFIX@${ECR_PREFIX}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_REGION@${ECR_REGION}@g" "$CONFIG_FILE"

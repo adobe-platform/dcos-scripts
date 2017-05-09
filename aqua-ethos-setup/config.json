@@ -57,6 +57,11 @@
         "settings": "{\"url\": \"https://qualysguard.qualys.com/api/2.0/fo/knowledge_base/vuln/\", \"enabled\": true, \"password\": \"ETH_QUALYS_PASSWORD\", \"username\": \"ETH_QUALYS_USERNAME\", \"last_update\": \"2017-04-04\"}"
       },
       {
+        "name": "Splunk",
+        "type": "LogManagement",
+        "settings": "{\"url\": \"ETH_SPLUNK_URL\", \"name\": \"Splunk\", \"index\": \"ETH_SPLUNK_INDEX\", \"token\": \"ETH_SPLUNK_TOKEN\", \"enable\": true}"
+      },
+      {
         "name": "image.policy",
         "type": "image.policy",
         "settings": "{\"author\": \"administrator\", \"average_score\": 7.5, \"maximum_score\": 8, \"daily_scan_time\": {\"hour\": 1, \"minute\": 0, \"second\": 0}, \"daily_scan_enabled\": true, \"only_none_root_users\": false, \"average_score_enabled\": false, \"maximum_score_enabled\": false, \"only_registered_images\": true, \"cves_black_list_enabled\": true, \"agent_image_scan_enabled\": false, \"packages_black_list_enabled\": false, \"trusted_base_images_enabled\": false}"
