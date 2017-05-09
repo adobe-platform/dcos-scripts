@@ -28,7 +28,7 @@ function setup {
 
 	if [[ -z "$DOCKER_ADMINS" ]]; then
 		log "DOCKER_ADMINS environment variable not provided. Setting to 'core'"
-		DOCKER_ADMINS="\"core\""
+		DOCKER_ADMINS="\\\"core\\\""
 	else
 		REPLACED_ADMINS="${DOCKER_ADMINS//,/\\",\\"}"
 		DOCKER_ADMINS="\\\"$REPLACED_ADMINS\\\""
