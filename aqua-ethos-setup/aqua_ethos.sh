@@ -28,10 +28,10 @@ function setup {
 
 	if [[ -z "$DOCKER_ADMINS" ]]; then
 		log "DOCKER_ADMINS environment variable not provided. Setting to 'core'"
-		DOCKER_ADMINS="\\\"core\\\""
+		DOCKER_ADMINS="\\\\\"core\\\\\""
 	else
-		REPLACED_ADMINS="${DOCKER_ADMINS//,/\\",\\"}"
-		DOCKER_ADMINS="\\\"$REPLACED_ADMINS\\\""
+		REPLACED_ADMINS="${DOCKER_ADMINS//,/\\\\\",\\\\\"}"
+		DOCKER_ADMINS="\\\\\"$REPLACED_ADMINS\\\\\""
 	fi
 
 	sudo mkdir -p $HC_DIR
@@ -39,7 +39,7 @@ function setup {
 
 	ARTIFACTORY_PREFIX=$(echo $ARTIFACTORY_URL | cut -f3 -d'/')
 	ECR_PREFIX=$(echo $ECR_URL | cut -f3 -d'/')
-	ETH_ECR_REGION=$(echo $ECR_URL | cut -f4 -d'.')
+	ECR_REGION=$(echo $ECR_URL | cut -f4 -d'.')
 
 	log "WEB_URL set to $WEB_URL"
 	log "HC_DIR set to $HC_DIR"
