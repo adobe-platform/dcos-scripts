@@ -24,7 +24,7 @@
         }
       },
       {
-        "name": "ecr-client",
+        "name": "ETH_ECR_PREFIX",
         "type": "AWS",
         "description": "",
         "author": "administrator",
