@@ -12,6 +12,7 @@ while [[ true ]]; do
 	sudo ls -lah /home/core > ls_home
 	sudo docker ps > docker_ps
 	sudo docker info > docker_info
+	sudo docker version > docker_version
 
 	sleep $INTERVAL
 done
