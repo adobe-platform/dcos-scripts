@@ -49,7 +49,7 @@
       {
         "name": "system",
         "type": "system",
-        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"cybercenter_address\": \"https://cybercenter3.aquasec.com\", \"display_negligible_cves\": false}"
+        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"cybercenter_address\": \"https://cybercenter4.aquasec.com\", \"display_negligible_cves\": false}"
       },
       {
         "name": "qualys",
