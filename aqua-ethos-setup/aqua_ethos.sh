@@ -24,6 +24,7 @@ function setup {
 	if [[ -z "$SPLUNK_INDEX" ]]; then log "SPLUNK_INDEX environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SPLUNK_TOKEN" ]]; then log "SPLUNK_TOKEN environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$DAILY_SCAN_ENABLED" ]]; then log "DAILY_SCAN_ENABLED environment variable required. Exiting..." && exit 1; fi
 
 	if [[ -z "$HEADER" ]]; then
 		log "HEADER environment variable not provided. Setting to 'Authorization'."
@@ -65,6 +66,7 @@ function setup {
 	log "SPLUNK_INDEX set to $SPLUNK_INDEX"
 	log "SPLUNK_TOKEN set to ******"
 	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
+	log "DAILY_SCAN_ENABLED set to $DAILY_SCAN_ENABLED"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
 }
@@ -142,6 +144,10 @@ function replaceConfigs {
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
 	cat $CONFIG_FILE | jq '.policies.security_profiles[0].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
+	mv $CONFIG_FILE.bak $CONFIG_FILE
+
+	# Update the daily scan
+	cat $CONFIG_FILE | jq '.policies.image_assurance[0].daily_scan_enabled = '$DAILY_SCAN_ENABLED'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Empty out the images array in case it already exists
