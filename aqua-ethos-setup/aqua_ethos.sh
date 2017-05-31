@@ -157,6 +157,10 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ECR_PASSWORD@${ECR_PASSWORD}@g" "$CONFIG_FILE"
 
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
+		# Add the new artifactory to the whitelist
+		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["ETH_MC_ARTIFACTORY_PREFIX"]' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+
 		sed -i.bak "s@ETH_MC_ARTIFACTORY_URL@${ARTIFACTORY_URL_MC}@g" "$CONFIG_FILE"
 		sed -i.bak "s@ETH_MC_ARTIFACTORY_PREFIX@${ARTIFACTORY_PREFIX_MC}@g" "$CONFIG_FILE"
 		sed -i.bak "s@ETH_MC_ARTIFACTORY_USERNAME@${ARTIFACTORY_USERNAME_MC}@g" "$CONFIG_FILE"
