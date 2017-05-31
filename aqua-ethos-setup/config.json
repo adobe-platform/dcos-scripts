@@ -45,7 +45,7 @@
         }
       },
       {
-        "name": "artifactory-mc",
+        "name": "ETH_MC_ARTIFACTORY_PREFIX",
         "type": "ART",
         "description": "",
         "author": "administrator",
