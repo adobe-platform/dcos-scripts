@@ -46,6 +46,14 @@ function setup {
 	ECR_PREFIX=$(echo $ECR_URL | cut -f3 -d'/')
 	ECR_REGION=$(echo $ECR_URL | cut -f4 -d'.')
 
+	# Check for the optional MC Artifactory URL
+	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
+		if [[ -z "$ARTIFACTORY_USERNAME_MC" ]]; then log "ARTIFACTORY_USERNAME_MC environment variable required when using ARTIFACTORY_URL_MC. Exiting..." && exit 1; fi
+		if [[ -z "$ARTIFACTORY_PASSWORD_MC" ]]; then log "ARTIFACTORY_PASSWORD_MC environment variable required when using ARTIFACTORY_URL_MC. Exiting..." && exit 1; fi
+		
+		ARTIFACTORY_PREFIX_MC=$(echo $ARTIFACTORY_URL_MC | cut -f3 -d'/')
+	fi
+
 	log "WEB_URL set to $WEB_URL"
 	log "HC_DIR set to $HC_DIR"
 	log "HEADER set to $HEADER"
@@ -69,6 +77,13 @@ function setup {
 	log "DAILY_SCAN_ENABLED set to $DAILY_SCAN_ENABLED"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
+
+	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
+		log "ARTIFACTORY_URL_MC set to $ARTIFACTORY_URL_MC"
+		log "ARTIFACTORY_PREFIX_MC set to $ARTIFACTORY_PREFIX_MC"
+		log "ARTIFACTORY_USERNAME_MC set to $ARTIFACTORY_USERNAME_MC"
+		log "ARTIFACTORY_PASSWORD_MC set to ******"
+	fi
 }
 
 function waitForWeb {
@@ -140,6 +155,21 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ECR_REGION@${ECR_REGION}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_USERNAME@${ECR_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_PASSWORD@${ECR_PASSWORD}@g" "$CONFIG_FILE"
+
+	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
+		# Add the new artifactory to the whitelist
+		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["ETH_MC_ARTIFACTORY_PREFIX"]' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+
+		sed -i.bak "s@ETH_MC_ARTIFACTORY_URL@${ARTIFACTORY_URL_MC}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_MC_ARTIFACTORY_PREFIX@${ARTIFACTORY_PREFIX_MC}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_MC_ARTIFACTORY_USERNAME@${ARTIFACTORY_USERNAME_MC}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_MC_ARTIFACTORY_PASSWORD@${ARTIFACTORY_PASSWORD_MC}@g" "$CONFIG_FILE"
+	else
+		# Remove the MC artifactory section
+		cat $CONFIG_FILE | jq 'del(.integration.registries[2])' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+	fi
 
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
