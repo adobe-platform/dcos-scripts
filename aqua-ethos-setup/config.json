@@ -43,6 +43,27 @@
           "url": "",
           "auth_token": ""
         }
+      },
+      {
+        "name": "artifactory-mc",
+        "type": "ART",
+        "description": "",
+        "author": "administrator",
+        "lastupdate": 1491322777,
+        "url": "ETH_ARTIFACTORY_URL_MC",
+        "username": "ETH_ARTIFACTORY_USERNAME_MC",
+        "password": "ETH_ARTIFACTORY_PASSWORD_MC",
+        "auto_pull": false,
+        "auto_pull_time": "03:00",
+        "auto_pull_max": 100,
+        "prefixes": [
+          "ETH_ARTIFACTORY_PREFIX_MC"
+        ],
+        "webhook": {
+          "enabled": false,
+          "url": "",
+          "auth_token": ""
+        }
       }
     ],
     "settings": [
