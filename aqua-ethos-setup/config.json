@@ -188,7 +188,7 @@
         "author": "administrator",
         "version": "1.0",
         "lastupdate": 1496257011,
-        "enforce": false,
+        "enforce": true,
         "block_inbound_connections": false,
         "block_outbound_connections": false,
         "readonly_root": false,
