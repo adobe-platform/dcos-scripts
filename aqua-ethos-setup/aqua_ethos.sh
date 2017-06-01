@@ -175,6 +175,8 @@ function replaceConfigs {
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
 	cat $CONFIG_FILE | jq '.policies.security_profiles[0].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
+	cat $CONFIG_FILE | jq '.policies.security_profiles[1].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
+	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Update the daily scan
 	cat $CONFIG_FILE | jq '.policies.image_assurance[0].daily_scan_enabled = '$DAILY_SCAN_ENABLED'' > $CONFIG_FILE.bak
