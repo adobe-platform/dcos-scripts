@@ -50,7 +50,7 @@ function setup {
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
 		if [[ -z "$ARTIFACTORY_USERNAME_MC" ]]; then log "ARTIFACTORY_USERNAME_MC environment variable required when using ARTIFACTORY_URL_MC. Exiting..." && exit 1; fi
 		if [[ -z "$ARTIFACTORY_PASSWORD_MC" ]]; then log "ARTIFACTORY_PASSWORD_MC environment variable required when using ARTIFACTORY_URL_MC. Exiting..." && exit 1; fi
-		
+
 		ARTIFACTORY_PREFIX_MC=$(echo $ARTIFACTORY_URL_MC | cut -f3 -d'/')
 	fi
 
