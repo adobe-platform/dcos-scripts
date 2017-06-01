@@ -84,6 +84,10 @@ function setup {
 		log "ARTIFACTORY_USERNAME_MC set to $ARTIFACTORY_USERNAME_MC"
 		log "ARTIFACTORY_PASSWORD_MC set to ******"
 	fi
+
+	if [[ ! -z "$DOCKER_HUB" ]]; then
+		log "DOCKER_HUB set to $DOCKER_HUB"
+	fi
 }
 
 function waitForWeb {
@@ -170,6 +174,14 @@ function replaceConfigs {
 		cat $CONFIG_FILE | jq 'del(.integration.registries[2])' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
+
+  if [[ ! -z "$DOCKER_HUB" ]]; then
+    echo "Docker HUB exists"
+  else
+    # Remove the Docker Hub section
+    cat $CONFIG_FILE | jq 'del(.integration.registries[3])' > $CONFIG_FILE.bak
+    mv $CONFIG_FILE.bak $CONFIG_FILE
+  fi
 
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''

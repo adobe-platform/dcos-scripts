@@ -64,6 +64,24 @@
           "url": "",
           "auth_token": ""
         }
+      },
+      {
+        "name": "Docker Hub",
+        "type": "HUB",
+        "description": "",
+        "author": "administrator",
+        "lastupdate": 1496347645,
+        "url": "",
+        "username": "",
+        "auto_pull": false,
+        "auto_pull_time": "03:00",
+        "auto_pull_max": 100,
+        "prefixes": [],
+        "webhook": {
+          "enabled": true,
+          "url": "",
+          "auth_token": ""
+        }
       }
     ],
     "settings": [
