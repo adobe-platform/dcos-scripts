@@ -176,11 +176,10 @@ function replaceConfigs {
 	fi
 
   if [[ ! -z "$DOCKER_HUB" ]]; then
-    echo "Docker HUB exists"
+    echo "Docker HUB is required"
   else
     # Remove the Docker Hub section
-    cat $CONFIG_FILE | jq 'del(.integration.registries[3])' > $CONFIG_FILE.bak
-    mv $CONFIG_FILE.bak $CONFIG_FILE
+    curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
   fi
 
 	# Update the encryption mode
