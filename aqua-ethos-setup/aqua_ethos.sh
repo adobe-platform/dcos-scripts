@@ -175,7 +175,7 @@ function replaceConfigs {
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
-  if [[ "$DOCKER_HUB" = "true" ]]; then
+  if [[ "$DOCKER_HUB" == true ]]; then
   	# Remove the Docker Hub section
     curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
   else
