@@ -50,7 +50,7 @@ function setup {
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
 		if [[ -z "$ARTIFACTORY_USERNAME_MC" ]]; then log "ARTIFACTORY_USERNAME_MC environment variable required when using ARTIFACTORY_URL_MC. Exiting..." && exit 1; fi
 		if [[ -z "$ARTIFACTORY_PASSWORD_MC" ]]; then log "ARTIFACTORY_PASSWORD_MC environment variable required when using ARTIFACTORY_URL_MC. Exiting..." && exit 1; fi
-		
+
 		ARTIFACTORY_PREFIX_MC=$(echo $ARTIFACTORY_URL_MC | cut -f3 -d'/')
 	fi
 
@@ -83,6 +83,10 @@ function setup {
 		log "ARTIFACTORY_PREFIX_MC set to $ARTIFACTORY_PREFIX_MC"
 		log "ARTIFACTORY_USERNAME_MC set to $ARTIFACTORY_USERNAME_MC"
 		log "ARTIFACTORY_PASSWORD_MC set to ******"
+	fi
+
+	if [[ ! -z "$DELETE_DOCKER_HUB" ]]; then
+		log "DELETE_DOCKER_HUB set to $DELETE_DOCKER_HUB"
 	fi
 }
 
@@ -171,9 +175,18 @@ function replaceConfigs {
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
+  if [[ "$DELETE_DOCKER_HUB" == true ]]; then
+  	# Remove the Docker Hub section
+    curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
+  else
+    echo "Docker HUB is required"
+  fi
+
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
 	cat $CONFIG_FILE | jq '.policies.security_profiles[0].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
+	mv $CONFIG_FILE.bak $CONFIG_FILE
+	cat $CONFIG_FILE | jq '.policies.security_profiles[1].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Update the daily scan
