@@ -75,7 +75,7 @@
       {
         "name": "qualys",
         "type": "integrations",
-        "settings": "{\"url\": \"https://qualysguard.qualys.com/api/2.0/fo/knowledge_base/vuln/\", \"enabled\": true, \"password\": \"ETH_QUALYS_PASSWORD\", \"username\": \"ETH_QUALYS_USERNAME\", \"last_update\": \"2017-04-04\"}"
+        "settings": "{\"url\": \"https://qualysapi.qualys.com/api/2.0/fo/knowledge_base/vuln/\", \"enabled\": true, \"password\": \"ETH_QUALYS_PASSWORD\", \"username\": \"ETH_QUALYS_USERNAME\", \"last_update\": \"2017-04-04\"}"
       },
       {
         "name": "Splunk",
