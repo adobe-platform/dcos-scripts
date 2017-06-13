@@ -179,7 +179,9 @@ function replaceConfigs {
   	# Remove the Docker Hub section
     curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
   else
-    cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ "adobeplatform"' > $CONFIG_FILE.bak
+    cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"]' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["behance"]' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
   fi
 
