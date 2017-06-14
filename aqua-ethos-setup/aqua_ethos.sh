@@ -176,7 +176,7 @@ function replaceConfigs {
 	fi
 
 	#Add DockerHUB Prefix
-	cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"] + ["behance"] + ["index.docker.io]' > $CONFIG_FILE.bak
+	cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"] + ["behance"] + ["index.docker.io"]' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	if [[ "$DELETE_DOCKER_HUB" == true ]]; then
