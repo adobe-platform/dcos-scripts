@@ -131,6 +131,15 @@ function makeGet {
 	echo $RES_CODE
 }
 
+function makePost {
+	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "$2" "$WEB_URL/$1"
+
+	if [[ "$?" != "0" ]]; then
+		log "Error sending POST to Aqua"
+		exit 1
+	fi
+}
+
 function getExistingImages {
 	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
 }
@@ -232,6 +241,28 @@ if [[ "$FD_USER" == "200" ]]; then
 	else
 		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"id": "flight-director","name": "Flight Director","password": "'$FD_PASSWORD'","email": "","admin":true,"role":"administrator"}' $WEB_URL/users
 fi
+
+createUser()
+{
+
+AQUA_USER=$1
+AQUA_ID=$2
+AQUA_NAME=$3
+AQUA_PASSWORD=$4
+AQUA_ROLE=$5
+USER=$(makeGet users/$AQUA_USER)
+
+if [[ "$USER" == "200" ]]; then
+   echo "200"
+ else
+   makePost "users" '{"id": "'$AQUA_ID'","name": "'$AQUA_NAME'","password": "'$AQUA_PASSWORD'","email": "","admin":true,"role":"'$AQUA_ROLE'"}'
+fi
+
+}
+
+createUser "auditor" "auditor" "Auditor" "$AUDITOR_PASSWORD" "auditor"
+createUser "flight-director" "flight-director" "FlightDirector" "$FD_PASSWORD" "administrator"
+createUser "scanner" "scanner" "Scanner" "$SCANNER_PASSWORD" "scanner"
 
 # HEALTHCHECK
 function healthcheck {
