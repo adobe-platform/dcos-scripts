@@ -175,15 +175,15 @@ function replaceConfigs {
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
-  if [[ "$DELETE_DOCKER_HUB" == true ]]; then
-  	# Remove the Docker Hub section
-    curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
-  else
-    cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"]' > $CONFIG_FILE.bak
+	if [[ ! -z "$DELETE_DOCKER_HUB" ]]; then
+ 		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"]' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["behance"]' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
-  fi
+ 	else
+ 		# Remove the Docker Hub section
+ 		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
+	fi
 
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
