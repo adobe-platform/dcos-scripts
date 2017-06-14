@@ -175,15 +175,12 @@ function replaceConfigs {
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
-# Add dockerHub Prefic
-cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"] + ["behance"]' > $CONFIG_FILE.bak
-mv $CONFIG_FILE.bak $CONFIG_FILE
-
 	if [[ "$DELETE_DOCKER_HUB" == true ]]; then
 		# Remove the Docker Hub section
 		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
 	else
-		echo "Docker HUB is required"
+		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"] + ["behance"] + ["index.docker.io]' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
 	# Update the encryption mode
