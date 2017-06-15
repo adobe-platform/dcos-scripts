@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/bash -x
 
 LOCAL_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_FILE="$LOCAL_DIR/config.json"
@@ -61,8 +61,8 @@ function setup {
 	log "HEADER set to $HEADER"
 	log "PASSWORD set to ******"
 	log "FD_PASSWORD set to ******"
-	log "AUDITOR_PASSWORD set to ******"
-	log "SCANNER_PASSWORD set to ******"
+	log "AUDITOR_PASSWORD set to $AUDITOR_PASSWORD"
+	log "SCANNER_PASSWORD set to $SCANNER_PASSWORD"
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
 	log "ARTIFACTORY_PREFIX set to $ARTIFACTORY_PREFIX"
 	log "ARTIFACTORY_USERNAME set to $ARTIFACTORY_USERNAME"
