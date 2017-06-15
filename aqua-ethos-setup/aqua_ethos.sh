@@ -233,15 +233,7 @@ replaceConfigs
 # Import the config file
 curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "@$CONFIG_FILE" "$WEB_URL/settings/import"
 
-# Add Flight Director User
-FD_USER=$(makeGet users/flight-director)
-
-if [[ "$FD_USER" == "200" ]]; then
-		echo "200"
-	else
-		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"id": "flight-director","name": "Flight Director","password": "'$FD_PASSWORD'","email": "","admin":true,"role":"administrator"}' $WEB_URL/users
-fi
-
+# Add Aqua UI Users
 createUser()
 {
 
