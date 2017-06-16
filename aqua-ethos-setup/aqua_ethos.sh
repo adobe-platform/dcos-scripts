@@ -12,6 +12,8 @@ function setup {
 	if [[ -z "$HC_DIR" ]]; then log "HC_DIR environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$PASSWORD" ]]; then log "PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$FD_PASSWORD" ]]; then log "FD_PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$AUDITOR_PASSWORD" ]]; then log "AUDITOR_PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$SCANNER_PASSWORD" ]]; then log "SCANNER_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_URL" ]]; then log "ARTIFACTORY_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_USERNAME" ]]; then log "ARTIFACTORY_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
@@ -59,6 +61,8 @@ function setup {
 	log "HEADER set to $HEADER"
 	log "PASSWORD set to ******"
 	log "FD_PASSWORD set to ******"
+	log "AUDITOR_PASSWORD set to ******"
+	log "SCANNER_PASSWORD set to ******"
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
 	log "ARTIFACTORY_PREFIX set to $ARTIFACTORY_PREFIX"
 	log "ARTIFACTORY_USERNAME set to $ARTIFACTORY_USERNAME"
@@ -129,6 +133,15 @@ function login {
 function makeGet {
 	RES_CODE=$(curl --write-out %{http_code} --silent --output /dev/null -H "$HEADER: Bearer $TOKEN" $WEB_URL/$1)
 	echo $RES_CODE
+}
+
+function makePost {
+	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "$2" "$WEB_URL/$1"
+
+	if [[ "$?" != "0" ]]; then
+		log "Error sending POST to Aqua"
+		exit 1
+	fi
 }
 
 function getExistingImages {
@@ -224,14 +237,28 @@ replaceConfigs
 # Import the config file
 curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d "@$CONFIG_FILE" "$WEB_URL/settings/import"
 
-# Add Flight Director User
-FD_USER=$(makeGet users/flight-director)
+# Add Aqua UI Users
+createUser()
+{
 
-if [[ "$FD_USER" == "200" ]]; then
-		echo "200"
-	else
-		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X POST -d '{"id": "flight-director","name": "Flight Director","password": "'$FD_PASSWORD'","email": "","admin":true,"role":"administrator"}' $WEB_URL/users
+AQUA_USER=$1
+AQUA_ID=$2
+AQUA_NAME=$3
+AQUA_PASSWORD=$4
+AQUA_ROLE=$5
+USER=$(makeGet users/$AQUA_USER)
+
+if [[ "$USER" == "200" ]]; then
+   echo "200"
+ else
+   makePost "users" '{"id": "'$AQUA_ID'","name": "'$AQUA_NAME'","password": "'$AQUA_PASSWORD'","email": "","admin":true,"role":"'$AQUA_ROLE'"}'
 fi
+
+}
+
+createUser "auditor" "auditor" "Auditor" "$AUDITOR_PASSWORD" "auditor"
+createUser "flight-director" "flight-director" "FlightDirector" "$FD_PASSWORD" "administrator"
+createUser "scanner" "scanner" "Scanner" "$SCANNER_PASSWORD" "scanner"
 
 # HEALTHCHECK
 function healthcheck {
