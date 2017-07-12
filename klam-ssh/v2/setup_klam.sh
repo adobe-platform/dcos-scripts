@@ -8,6 +8,7 @@ function usage {
     echo "usage: $0 [options]"
     echo "       -r|--region                 The AWS region"
     echo "       -o|--role-name              The AWS IAM role name"
+    echo "       -g|--iam-group-name         The AWS IAM group name"
     echo "       -e|--encryption-id          The encryption ID"
     echo "       -k|--encryption-key         The encryption key"
     echo "       -p|--key-location-prefix    The encryption ID"
@@ -31,6 +32,9 @@ case $key in
     -o|--role-name)
     ROLE_NAME="$2"
     shift;;
+    -g|--iam-group-name)
+    IAM_GROUP_NAME="$2"
+    shift;;
     -e|--encryption-id)
     ENCRYPTION_ID="$2"
     shift;;
@@ -50,7 +54,7 @@ esac
 shift # past argument or value
 done
 
-if [[ -z $REGION || -z $ROLE_NAME || -z $ENCRYPTION_ID || -z $ENCRYPTION_KEY || -z $KEY_LOCATION_PREFIX || -z $IMAGE ]]; then
+if [[ -z $REGION || -z $ROLE_NAME || -g $IAM_GROUP_NAME || -z $ENCRYPTION_ID || -z $ENCRYPTION_KEY || -z $KEY_LOCATION_PREFIX || -z $IMAGE ]]; then
   usage
 fi
 
@@ -83,7 +87,7 @@ cat << EOT > /home/core/nsswitch.conf
 passwd:     files usrfiles klam
 shadow:     files usrfiles klam
 group:      files usrfiles klam
- 
+
 hosts:      files usrfiles resolv dns
 networks:   files usrfiles dns
 
@@ -95,7 +99,7 @@ ethers:     files
 netmasks:   files
 netgroup:   files
 bootparams: files
-automount:  files 
+automount:  files
 aliases:    files
 EOT
 
@@ -130,6 +134,7 @@ echo "Creating environment file of KLAM values" | systemd-cat -t klam-ssh
 cat << EOT > /opt/klam/environment
 REGION=${REGION}
 ROLE_NAME=${ROLE_NAME}
+IAM_GROUP_NAME=${IAM_GROUP_NAME}
 ENCRYPTION_ID=${ENCRYPTION_ID}
 ENCRYPTION_KEY=${ENCRYPTION_KEY}
 KEY_LOCATION_PREFIX=${KEY_LOCATION_PREFIX}
@@ -246,11 +251,11 @@ cat << EOT > ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($
 %ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN ALL=(ALL) NOPASSWD: ALL
 EOT
 mv -f ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN /etc/sudoers.d/
-cat << EOT > ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ADMIN
-%ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ADMIN ALL=(ALL) NOPASSWD: ALL
-EOT
-mv -f ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ADMIN /etc/sudoers.d/
 
+cat << EOT > $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }')
+%$(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') ALL=(ALL) NOPASSWD: ALL
+EOT
+mv -f $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') /etc/sudoers.d/
 
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root" | systemd-cat -t klam-ssh
@@ -288,5 +293,3 @@ echo "-------Done klam-ssh setup-------"
 while true; do
   sleep 5
 done
-
-
