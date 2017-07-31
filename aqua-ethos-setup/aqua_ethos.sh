@@ -26,6 +26,7 @@ function setup {
 	if [[ -z "$SPLUNK_INDEX" ]]; then log "SPLUNK_INDEX environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SPLUNK_TOKEN" ]]; then log "SPLUNK_TOKEN environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$STATIC_BINARIES_PROTECTION" ]]; then log "STATIC_BINARIES_PROTECTION environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$DAILY_SCAN_ENABLED" ]]; then log "DAILY_SCAN_ENABLED environment variable required. Exiting..." && exit 1; fi
 
 	if [[ -z "$HEADER" ]]; then
@@ -202,6 +203,8 @@ function replaceConfigs {
 	cat $CONFIG_FILE | jq '.policies.security_profiles[0].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 	cat $CONFIG_FILE | jq '.policies.security_profiles[1].encrypt_all_envs = '$ENCRYPT_ENV_VARS'' > $CONFIG_FILE.bak
+	mv $CONFIG_FILE.bak $CONFIG_FILE
+	cat $CONFIG_FILE | jq '.policies.security_profiles[0].static_binaries_protection = '$STATIC_BINARIES_PROTECTION'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Update the daily scan

@@ -152,6 +152,7 @@
         "version": "1.0",
         "lastupdate": 1487346450,
         "enforce": true,
+        "static_binaries_protection": false,
         "block_inbound_connections": false,
         "block_outbound_connections": false,
         "readonly_root": false,
