@@ -219,7 +219,7 @@ echo "Updating /etc/ssh/sshd_config" | systemd-cat -t klam-ssh
 cat << EOT > sshd_config
 # Use most defaults for sshd configuration.
 UsePAM yes
-Banner /etc/issue.net
+Banner /etc/issues.net
 UsePrivilegeSeparation sandbox
 Subsystem sftp internal-sftp
 
