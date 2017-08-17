@@ -203,14 +203,30 @@ echo "Moving klam.sh" | systemd-cat -t klam-ssh
 mv -f /home/core/klam.sh /etc/profile.d/klam.sh
 cat /etc/profile.d/klam.sh
 
+cat << EOT > /etc/issues.net
+ _____ _               _____ _____ _____ 
+|  |  | |___ _____ ___|   __|   __|  |  |
+|    -| | .'|     |___|__   |__   |     |
+|__|__|_|__,|_|_|_|   |_____|_____|__|__|
+
+https://klam-sj.corp.adobe.com
+Authorized uses only. All activity may be monitored and reported.
+EOT
+chmod 644 /etc/issues.net
+
 #  update /etc/ssh/sshd_config if necessary
 echo "Updating /etc/ssh/sshd_config" | systemd-cat -t klam-ssh
 cat << EOT > sshd_config
 # Use most defaults for sshd configuration.
 UsePAM yes
+Banner /etc/issue.net
 UsePrivilegeSeparation sandbox
 Subsystem sftp internal-sftp
 
+Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,umac-128@openssh.com,hmac-sha2-256,hmac-sha2-512
+ClientAliveInterval 300
+ClientAliveCountMax 0
 PermitRootLogin no
 PasswordAuthentication no
 ChallengeResponseAuthentication yes
@@ -218,31 +234,37 @@ AuthorizedKeysCommand /opt/klam/lib/authorizedkeys_command.sh
 AuthorizedKeysCommandUser root
 ClientAliveInterval 900
 ClientAliveCountMax 0
+IgnoreRhosts yes
+X11Forwarding no
+Protocol 2
+LoginGraceTime 60
+PermitEmptyPasswords no
+MaxAuthTries 4
+HostbasedAuthentication no
+LogLevel INFO
+PermitUserEnvironment no
+DenyUsers
 EOT
 mv -f sshd_config /etc/ssh/sshd_config
+chmod 600 /etc/ssh/sshd_config
 
 cat /etc/ssh/sshd_config | systemd-cat -t klam-ssh
 
 echo "Setting up PAM modules" | systemd-cat -t klam-ssh
 cat << EOT > system-login
 auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=900
-auth            required        pam_nologin.so
+auth        required        pam_nologin.so
 auth		include         system-auth
 
 account         required        pam_access.so
 account         required        pam_nologin.so
-account         include         system-auth
 account         required        pam_tally2.so onerr=succeed
-
-password        include         system-auth
 
 session         optional        pam_loginuid.so
 session         required        pam_env.so
-session    	required    	pam_mkhomedir.so
+session    	    required        pam_mkhomedir.so umask=0077
 session         optional        pam_lastlog.so
-session         include         system-auth
 session         optional        pam_motd.so motd=/etc/motd
-session         optional        pam_mail.so
 EOT
 mv -f system-login /etc/pam.d/system-login
 
@@ -256,6 +278,18 @@ cat << EOT > $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }')
 %$(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') ALL=(ALL) NOPASSWD: ALL
 EOT
 mv -f $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') /etc/sudoers.d/
+
+# Validate /etc/passwd to ensure all groups exist in /etc/group as well
+for i in $(cut -s -d: -f4 /etc/passwd | sort -u );do 
+  grep -q -P "^.*?:[^:]*:$i:" /etc/group 
+  if [ $? -ne 0 ]; then
+    if [[ $(getent passwd $i) != "" ]];then 
+      echo -n "$(getent passwd $i | awk -F":" '{print $1}'):x:$i:" >> /etc/group
+    else
+      echo -n "dcos_$i:x:$i:" >> /etc/group
+    fi
+  fi 
+done
 
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root" | systemd-cat -t klam-ssh
