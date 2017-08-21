@@ -223,7 +223,7 @@ function replaceConfigs {
 
 		REPO=$(echo $IMAGE | cut -d':' -f1)
 
-	    cat $CONFIG_FILE | jq '.images |= .+ [{"Name":"'$IMAGE'","Repository":"'$REPO'","PolicyName":"","Registry":"artifactory-admin","Labels":["production approved"]}]' > $CONFIG_FILE.bak
+	    cat $CONFIG_FILE | jq '.images |= .+ [{"Name":"'$IMAGE'","Repository":"'$REPO'","PolicyName":"","Registry":"$ARTIFACTORY_PREFIX","Labels":["production approved"]}]' > $CONFIG_FILE.bak
 	    mv $CONFIG_FILE.bak $CONFIG_FILE
 	done
 }
@@ -268,7 +268,7 @@ function healthcheck {
 
 	EXISTING_RULE=$(makeGet adminrules/ethos)
 	EXISTING_PROFILE=$(makeGet securityprofiles/Ethos)
-	EXISTING_ARTIFACTORY=$(makeGet "registries/artifactory-admin")
+	EXISTING_ARTIFACTORY=$(makeGet "registries/$ARTIFACTORY_PREFIX")
 
 	if [[ "$EXISTING_RULE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
