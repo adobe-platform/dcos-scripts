@@ -3,7 +3,7 @@
   "integration": {
     "registries": [
       {
-        "name": "artifactory-admin",
+        "name": "ETH_ARTIFACTORY_PREFIX",
         "type": "ART",
         "description": "",
         "author": "administrator",
