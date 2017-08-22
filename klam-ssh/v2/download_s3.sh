@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 USER=$1
-SYSDFILE="/etc/systemd/system/docker.service.d/10-enable-namespaces.conf"
+SYSDFILE="/etc/systemd/system/docker.service.d/*namespaces*.conf"
 
 # docker start functions
 start_nsdocker ()
@@ -20,12 +20,8 @@ if [ -f /opt/klam/environment ]; then
   source /opt/klam/environment;
 fi
 
-if [ -a ${SYSDFILE} ]; then
-  if grep "userns-remap=default" ${SYSDFILE}; then
-    start_nsdocker
-  else
-    start_docker
-  fi
+if grep "userns" ${SYSDFILE}; then
+  start_nsdocker
 else
   start_docker
 fi

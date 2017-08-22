@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 USER=$1
-SYSDFILE="/etc/systemd/system/docker.service.d/10-enable-namespaces.conf"
+SYSDFILE="/etc/systemd/system/docker.service.d/*namespaces*.conf"
 
 # docker start functions
 start_nsdocker ()
@@ -39,12 +39,8 @@ echo "${USER}:x:$(id -u ${USER}):$(id -g ${USER}):KLAM USER ${USER}:/home/${USER
 
 echo "Running authorizedkeys_command for ${USER}" | systemd-cat -p info -t klam-ssh
 
-if [ -a ${SYSDFILE} ]; then
-  if grep "userns-remap=default" ${SYSDFILE}; then
-    start_nsdocker
-  else
-    start_docker
-  fi
+if grep "userns" ${SYSDFILE}; then
+  start_nsdocker
 else
   start_docker
 fi
