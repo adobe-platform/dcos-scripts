@@ -252,7 +252,6 @@ echo "Setting up PAM modules" | systemd-cat -t klam-ssh
 cat << EOT > system-login
 auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=900
 auth        required        pam_nologin.so
-auth		include         system-auth
 
 account         required        pam_access.so
 account         required        pam_nologin.so
@@ -287,6 +286,7 @@ for i in $(cut -s -d: -f4 /etc/passwd | sort -u );do
     fi
   fi 
 done
+
 
 # Change ownership of authorizedkeys_command
 echo "Changing ownership of authorizedkeys_command to root:root" | systemd-cat -t klam-ssh
@@ -324,3 +324,11 @@ echo "-------Done klam-ssh setup-------"
 while true; do
   sleep 5
 done
+
+chmod 644 /etc/passwd
+chmod 644 /etc/group
+chmod 640 /etc/gshadow
+chmod 600 /etc/passwd-
+chmod 600 /etc/group-
+chmod 600 /etc/gshadow-
+chmod 600 /etc/shadow-
