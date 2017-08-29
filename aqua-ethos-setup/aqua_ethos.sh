@@ -42,6 +42,22 @@ function setup {
 		DOCKER_ADMINS="\\\\\"$REPLACED_ADMINS\\\\\""
 	fi
 
+	if [[ -z "$DOCKER_CLIENTS" ]]; then
+		log "DOCKER_CLIENTS environment variable not provided. Setting to ''"
+		DOCKER_CLIENTS="\\\\\"core\\\\\""
+	else
+		REPLACED_CLIENTS="${DOCKER_CLIENTS//,/\\\\\",\\\\\"}"
+		DOCKER_CLIENTS="\\\\\"$REPLACED_CLIENTS\\\\\""
+	fi
+
+	if [[ -z "$CLIENT_IMAGES" ]]; then
+		log "CLIENT_IMAGES environment variable not provided. Setting to ''"
+		CLIENT_IMAGES="\\\\\"alpine:latest\\\\\""
+	else
+		REPLACED_IMAGES="${CLIENT_IMAGES//,/\\\\\",\\\\\"}"
+		CLIENT_IMAGES="\\\\\"$REPLACED_IMAGES\\\\\""
+	fi
+
 	sudo mkdir -p $HC_DIR
 	sudo chown -R $(whoami):$(whoami) $HC_DIR
 
@@ -82,6 +98,8 @@ function setup {
 	log "DAILY_SCAN_ENABLED set to $DAILY_SCAN_ENABLED"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
+	log "DOCKER_CLIENTS set to $DOCKER_CLIENTS"
+	log "CLIENT_IMAGES set to $CLIENT_IMAGES"
 
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
 		log "ARTIFACTORY_URL_MC set to $ARTIFACTORY_URL_MC"
@@ -167,7 +185,8 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_SPLUNK_INDEX@${SPLUNK_INDEX}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_SPLUNK_TOKEN@${SPLUNK_TOKEN}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_DOCKER_ADMINS@${DOCKER_ADMINS}@g" "$CONFIG_FILE"
-
+	sed -i.bak "s@ETH_DOCKER_CLIENTS@${DOCKER_CLIENTS}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_CLIENT_IMAGES@${CLIENT_IMAGES}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_URL@${ECR_URL}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_PREFIX@${ECR_PREFIX}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_REGION@${ECR_REGION}@g" "$CONFIG_FILE"

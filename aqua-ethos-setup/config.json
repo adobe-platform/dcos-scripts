@@ -243,7 +243,8 @@
       }
     ],
     "user_access_control": [
-      "{\"name\": \"ethos\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.0\", \"accessors\": {\"users\": [ETH_DOCKER_ADMINS], \"groups\": [\"core\"]}, \"resources\": {\"apps\": [\"*\"], \"nodes\": [\"*\"], \"images\": [\"*\"], \"secrets\": [\"*\"], \"volumes\": [\"*\"], \"networks\": [\"*\"], \"services\": [\"*\"], \"containers\": [\"*\"], \"aqua_labels\": [\"*\"]}, \"lastupdate\": 1491249828, \"description\": \"\"}"
+      "{\"name\": \"ethos\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.0\", \"accessors\": {\"users\": [ETH_DOCKER_ADMINS], \"groups\": [\"core\"]}, \"resources\": {\"apps\": [\"*\"], \"nodes\": [\"*\"], \"images\": [\"*\"], \"secrets\": [\"*\"], \"volumes\": [\"*\"], \"networks\": [\"*\"], \"services\": [\"*\"], \"containers\": [\"*\"], \"aqua_labels\": [\"*\"]}, \"lastupdate\": 1491249828, \"description\": \"\"}",
+      "{\"name\": \"ethos-client\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.5\", \"accessors\": {\"users\": [ETH_DOCKER_CLIENTS]}, \"resources\": {\"images\": [ETH_CLIENT_IMAGES]}, \"lastupdate\": 1504019810, \"description\": \"Restrictive User access policy\"}"
     ]
   },
   "images": [],
