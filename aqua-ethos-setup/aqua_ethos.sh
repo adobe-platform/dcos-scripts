@@ -44,7 +44,7 @@ function setup {
 
 	if [[ -z "$DOCKER_CLIENTS" ]]; then
 		log "DOCKER_CLIENTS environment variable not provided. Setting to ''"
-		DOCKER_CLIENTS="\\\\\"\\\\\""
+		DOCKER_CLIENTS="\\\\\"core\\\\\""
 	else
 		REPLACED_CLIENTS="${DOCKER_CLIENTS//,/\\\\\",\\\\\"}"
 		DOCKER_CLIENTS="\\\\\"$REPLACED_CLIENTS\\\\\""
@@ -52,7 +52,7 @@ function setup {
 
 	if [[ -z "$CLIENT_IMAGES" ]]; then
 		log "CLIENT_IMAGES environment variable not provided. Setting to ''"
-		CLIENT_IMAGES="\\\\\"\\\\\""
+		CLIENT_IMAGES="\\\\\"alpine:latest\\\\\""
 	else
 		REPLACED_IMAGES="${CLIENT_IMAGES//,/\\\\\",\\\\\"}"
 		CLIENT_IMAGES="\\\\\"$REPLACED_IMAGES\\\\\""
