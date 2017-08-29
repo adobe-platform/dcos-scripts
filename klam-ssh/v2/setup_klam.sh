@@ -241,7 +241,8 @@ MaxAuthTries 4
 HostbasedAuthentication no
 LogLevel INFO
 PermitUserEnvironment no
-DenyUsers
+DenyUsers root
+AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }')
 EOT
 mv -f sshd_config /etc/ssh/sshd_config
 chmod 600 /etc/ssh/sshd_config
@@ -328,7 +329,9 @@ done
 chmod 644 /etc/passwd
 chmod 644 /etc/group
 chmod 640 /etc/gshadow
+chmod 640 /etc/shadow
 chmod 600 /etc/passwd-
 chmod 600 /etc/group-
 chmod 600 /etc/gshadow-
 chmod 600 /etc/shadow-
+chmod -R g-wx,o-rwx /var/log/*

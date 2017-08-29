@@ -44,10 +44,12 @@ echo "${USER}:x:$(id -g ${USER}):" >> /etc/group
 chmod 644 /etc/passwd
 chmod 644 /etc/group
 chmod 640 /etc/gshadow
+chmod 640 /etc/shadow
 chmod 600 /etc/passwd-
 chmod 600 /etc/group-
 chmod 600 /etc/gshadow-
 chmod 600 /etc/shadow-
+chmod -R g-wx,o-rwx /var/log/*
 
 echo "Running authorizedkeys_command for ${USER}" | systemd-cat -p info -t klam-ssh
 
