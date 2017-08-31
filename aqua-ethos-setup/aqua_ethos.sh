@@ -42,8 +42,8 @@ function setup {
 		DOCKER_ADMINS="\\\\\"$REPLACED_ADMINS\\\\\""
 	fi
 
-	sudo mkdir -p $HC_DIR
-	sudo chown -R $(whoami):$(whoami) $HC_DIR
+	mkdir -p $HC_DIR
+	chown -R $(whoami):$(whoami) $HC_DIR
 
 	ARTIFACTORY_PREFIX=$(echo $ARTIFACTORY_URL | cut -f3 -d'/')
 	ECR_PREFIX=$(echo $ECR_URL | cut -f3 -d'/')
@@ -128,7 +128,7 @@ function login {
 		exit 1
 	fi
 
-	sudo touch $LOCAL_DIR/login
+	touch $LOCAL_DIR/login
 }
 
 function makeGet {
@@ -276,7 +276,7 @@ function healthcheck {
 	if [[ "$EXISTING_RULE" == "200" &&
 		  "$EXISTING_PROFILE" == "200" &&
 		  "$EXISTING_ARTIFACTORY" == "200" ]]; then
-		sudo touch $HC_DIR/healthcheck
+		touch $HC_DIR/healthcheck
 		echo "200"
 	else
 		echo "400"
