@@ -54,5 +54,6 @@ if [[ ! -z $OUTPUT ]]; then
   sed -i "/$(id -g ${USER})/d" /etc/group
   echo "${USER}:x:$(id -g ${USER}):" >> /etc/group
   gpasswd -a ${USER} docker
+  echo "$OUTPUT"
 fi
 exit 0
