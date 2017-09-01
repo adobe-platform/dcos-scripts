@@ -253,6 +253,7 @@ echo "Setting up PAM modules" | systemd-cat -t klam-ssh
 cat << EOT > system-login
 auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=900
 auth        required        pam_nologin.so
+auth		include         system-auth
 
 account         required        pam_access.so
 account         required        pam_nologin.so
