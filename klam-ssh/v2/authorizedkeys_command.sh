@@ -20,27 +20,6 @@ if [ -f /opt/klam/environment ]; then
   source /opt/klam/environment;
 fi
 
-echo "Creating User Directory"
-
-if grep "pam_mkhomedir" /etc/pam.d/system-login; then
-  echo "PAM userdir"
-else
-  echo "create userdir"
-  mkdir -p /home/${USER} > /dev/null
-  chown -R ${USER}. /home/${USER} > /dev/null
-  chmod 750 /home/${USER}
-fi
-
-echo "adding user to docker group"
-gpasswd -a ${USER} docker
-
-echo "adding user to passwd file"
-sed -i "/${USER}/d" /etc/passwd
-echo "${USER}:x:$(id -u ${USER}):$(id -g ${USER}):KLAM USER ${USER}:/home/${USER}:/bin/bash" >> /etc/passwd
-echo "adding group to group file"
-sed -i "/$(id -g ${USER})/d" /etc/group
-echo "${USER}:x:$(id -g ${USER}):" >> /etc/group
-
 chmod 644 /etc/passwd
 chmod 644 /etc/group
 chmod 640 /etc/gshadow
@@ -54,8 +33,26 @@ chmod -R g-wx,o-rwx /var/log/*
 echo "Running authorizedkeys_command for ${USER}" | systemd-cat -p info -t klam-ssh
 
 if grep "userns" ${SYSDFILE}; then
-  start_nsdocker
+  OUTPUT=`start_nsdocker`
 else
-  start_docker
+  OUTPUT=`start_docker`
+fi
+if [[ ! -z $OUTPUT ]]; then
+  echo "Klam verified: Creating User Directory"
+  if grep "pam_mkhomedir" /etc/pam.d/system-login; then
+    echo "Using PAM module"
+  else
+    echo "create userdir"
+    mkdir -p /home/${USER} > /dev/null
+    chown -R ${USER}. /home/${USER} > /dev/null
+    chmod 750 /home/${USER}
+  fi
+  echo "adding user to passwd file"
+  sed -i "/${USER}/d" /etc/passwd
+  echo "${USER}:x:$(id -u ${USER}):$(id -g ${USER}):KLAM USER ${USER}:/home/${USER}:/bin/bash" >> /etc/passwd
+  echo "Adding user to group file"
+  sed -i "/$(id -g ${USER})/d" /etc/group
+  echo "${USER}:x:$(id -g ${USER}):" >> /etc/group
+  gpasswd -a ${USER} docker
 fi
 exit 0
