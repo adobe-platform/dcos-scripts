@@ -318,15 +318,7 @@ if [ -f /usr/sbin/ldconfig ]; then
   /usr/sbin/ldconfig
 fi
 
-# Restart SSHD
-echo "Restarting SSHD" | systemd-cat -t klam-ssh
-systemctl restart sshd.service
-echo "-------Done klam-ssh setup-------"
-
-while true; do
-  sleep 5
-done
-
+# Permissions fixes for hubble
 chmod 644 /etc/passwd
 chmod 644 /etc/group
 chmod 640 /etc/gshadow
@@ -335,4 +327,15 @@ chmod 600 /etc/passwd-
 chmod 600 /etc/group-
 chmod 600 /etc/gshadow-
 chmod 600 /etc/shadow-
-chmod -R g-wx,o-rwx /var/log/*
+
+# Restart SSHD
+echo "Restarting SSHD" | systemd-cat -t klam-ssh
+systemctl restart sshd.service
+
+echo "-------Done klam-ssh setup-------"
+while true; do
+  sleep 15
+  # apply permissions for /var/log
+  chmod -R g-wx,o-rwx /var/log/*
+done
+
