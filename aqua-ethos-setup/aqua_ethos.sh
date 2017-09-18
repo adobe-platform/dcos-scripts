@@ -226,7 +226,7 @@ function replaceConfigs {
 
 		REPO=$(echo $IMAGE | cut -d':' -f1)
 
-	    cat $CONFIG_FILE | jq '.images |= .+ [{"Name":"'$IMAGE'","Repository":"'$REPO'","PolicyName":"","Registry":"$ARTIFACTORY_PREFIX","Labels":["production approved"]}]' > $CONFIG_FILE.bak
+	    cat $CONFIG_FILE | jq '.images |= .+ [{"Name":"'$IMAGE'","Repository":"'$REPO'","PolicyName":"","Registry":"$ARTIFACTORY_PREFIX","Labels":["production_approved"]}]' > $CONFIG_FILE.bak
 	    mv $CONFIG_FILE.bak $CONFIG_FILE
 	done
 }
