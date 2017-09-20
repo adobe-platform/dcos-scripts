@@ -1,7 +1,7 @@
 #!/bin/bash -x
 
 USER=$1
-SYSDFILE="/etc/systemd/system/docker.service.d/*namespaces*.conf"
+SYSDFILE="/etc/docker/daemon.json"
 
 # docker start functions
 start_nsdocker ()
