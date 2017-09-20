@@ -249,7 +249,7 @@
   "images": [],
   "labels": [
     {
-      "name": "production approved",
+      "name": "production_approved",
       "description": "",
       "created": "2017-04-03T14:37:22.148217Z",
       "author": "administrator"
