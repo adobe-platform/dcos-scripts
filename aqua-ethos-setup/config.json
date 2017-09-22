@@ -70,7 +70,7 @@
       {
         "name": "system",
         "type": "system",
-        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"cli_scans_only\": false, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"show_willnotfix\": false, \"scan_executables\": false, \"dynamic_profiling\": {\"enabled\": false, \"stop_after_dur\": 0, \"stop_after_exec\": 0, \"enforce_profiles\": false, \"freeze_after_dur\": 86400000000000, \"freeze_after_exec\": 5}, \"cybercenter_address\": \"https://cybercenter4.aquasec.com\", \"scan_sensitive_data\": true, \"static_binaries_protection\": true}"
+        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"cli_scans_only\": false, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"show_willnotfix\": false, \"scan_executables\": false, \"dynamic_profiling\": {\"enabled\": false, \"stop_after_dur\": 0, \"stop_after_exec\": 0, \"enforce_profiles\": false, \"freeze_after_dur\": 86400000000000, \"freeze_after_exec\": 5}, \"cybercenter_address\": \"https://cybercenter4.aquasec.com\", \"scan_sensitive_data\": false, \"static_binaries_protection\": true}"
       },
       {
         "name": "qualys",
