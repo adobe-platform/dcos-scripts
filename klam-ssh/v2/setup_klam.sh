@@ -242,7 +242,7 @@ HostbasedAuthentication no
 LogLevel INFO
 PermitUserEnvironment no
 DenyUsers root
-AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }')
+AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER
 EOT
 mv -f sshd_config /etc/ssh/sshd_config
 chmod 600 /etc/ssh/sshd_config
@@ -276,6 +276,11 @@ cat << EOT > $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }')
 %$(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') ALL=(ALL) NOPASSWD: ALL
 EOT
 mv -f $(echo $IAM_GROUP_NAME |awk '{ print toupper($0) }') /etc/sudoers.d/
+
+cat << EOT > ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER
+%ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER ALL=(ALL) NOPASSWD: ALL
+EOT
+mv -f ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER /etc/sudoers.d/
 
 # Validate /etc/passwd to ensure all groups exist in /etc/group as well
 for i in $(cut -s -d: -f4 /etc/passwd | sort -u );do 
