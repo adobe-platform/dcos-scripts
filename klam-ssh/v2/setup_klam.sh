@@ -156,10 +156,10 @@ docker --config=$DIR/.docker/ pull ${IMAGE}
 echo "Creating docker klam-ssh" | systemd-cat -t klam-ssh
 docker --config=$DIR/.docker/ create --name klam-ssh "${IMAGE}"
 echo "Copying files to /opt/klam/lib" | systemd-cat -t klam-ssh
-docker cp klam-ssh:/tmp/klam-coreos/opt/klam/lib/libnss_klam.so.2.0 /opt/klam/lib
-docker cp klam-ssh:/tmp/klam-coreos/opt/klam/lib/libjansson.a /opt/klam/lib
-docker cp klam-ssh:/tmp/klam-coreos/opt/klam/lib/libjansson.la /opt/klam/lib
-docker cp klam-ssh:/tmp/klam-coreos/opt/klam/lib/libjansson.so.4.7.0 /opt/klam/lib
+docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libnss_klam.so.2.0 /opt/klam/lib
+docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libjansson.a /opt/klam/lib
+docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libjansson.la /opt/klam/lib
+docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libjansson.so.4.7.0 /opt/klam/lib
 docker cp klam-ssh:/tmp/klam-coreos/opt/klam/klam_cmd /opt/klam/lib
 ln -sf /opt/klam/lib/libnss_klam.so.2.0 /opt/klam/lib/libnss_klam.so
 ln -sf /opt/klam/lib/libnss_klam.so.2.0 /opt/klam/lib/libnss_klam.so.2
