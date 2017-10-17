@@ -1,8 +1,9 @@
 #!/bin/bash
 
-echo "-------Beginning klam-ssh setup-------" | systemd-cat -t klam-ssh
+echo "-------Beginning klam-ssh setup-------"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+Daemon=true
 
 function usage {
     echo "usage: $0 [options]"
@@ -13,7 +14,8 @@ function usage {
     echo "       -k|--encryption-key         The encryption key"
     echo "       -p|--key-location-prefix    The encryption ID"
     echo "       -i|--image                  The KLAM SSH docker image"
-    echo "       -h|--help                Show this message"
+    echo "       -q|--quit                   Quit on installation"
+    echo "       -h|--help                   Show this message"
     exit 1
 }
 
@@ -47,14 +49,17 @@ case $key in
     -i|--image)
     IMAGE="$2"
     shift;;
+    -q|--quit)
+    DAEMON=false
+    ;;
     *)
-            # unknown option
+    # unknown option
     ;;
 esac
 shift # past argument or value
 done
 
-if [[ -z $REGION || -z $ROLE_NAME || -g $IAM_GROUP_NAME || -z $ENCRYPTION_ID || -z $ENCRYPTION_KEY || -z $KEY_LOCATION_PREFIX || -z $IMAGE ]]; then
+if [[ -r $REGION || -z $ROLE_NAME || -g $IAM_GROUP_NAME || -z $ENCRYPTION_ID || -z $ENCRYPTION_KEY || -z $KEY_LOCATION_PREFIX || -z $IMAGE ]]; then
   usage
 fi
 
@@ -76,10 +81,10 @@ case $REGION in
     ;;
 esac
 
-echo "Using key location: $KEY_LOCATION with prefix: $KEY_LOCATION_PREFIX" | systemd-cat -t klam-ssh
+echo "Using key location: $KEY_LOCATION with prefix: $KEY_LOCATION_PREFIX"
 
 # create nsswitch.conf
-echo "Creating /home/core/nsswitch.conf..." | systemd-cat -t klam-ssh
+echo "Creating /home/core/nsswitch.conf..."
 cat << EOT > /home/core/nsswitch.conf
 #
 # /etc/nsswitch.conf
@@ -104,7 +109,7 @@ aliases:    files
 EOT
 
 # create klam-ssh.conf
-echo "Creating /home/core/klam-ssh.conf..." | systemd-cat -t klam-ssh
+echo "Creating /home/core/klam-ssh.conf..."
 cat << EOT > /home/core/klam-ssh.conf
 {
     "key_location": "${KEY_LOCATION_PREFIX:-adobe-cloudops-ssh-users}${KEY_LOCATION}",
@@ -126,11 +131,11 @@ readonly PROMPT_COMMAND='RETRN_VAL=$?;logger -p local6.debug "$KLAM_USER [$$]: $
 EOT
 
 # Create directory structure
-echo "Making directories: /opt/klam/lib /opt/klam/lib /etc/ld.so.conf.d" | systemd-cat -t klam-ssh
+echo "Making directories: /opt/klam/lib /opt/klam/lib /etc/ld.so.conf.d"
 mkdir -p /opt/klam/lib /etc/ld.so.conf.d
 
 # Creating environment file of KLAM values
-echo "Creating environment file of KLAM values" | systemd-cat -t klam-ssh
+echo "Creating environment file of KLAM values"
 cat << EOT > /opt/klam/environment
 REGION=${REGION}
 ROLE_NAME=${ROLE_NAME}
@@ -144,18 +149,18 @@ EOT
 # Klam-ssh requires a shared library to be resident on the host.  These
 # steps copy it from the klam-ssh container via a volume mount, then
 # remove the container
-echo "removing container if it exists" | systemd-cat -t klam-ssh
+echo "removing container if it exists"
 if docker ps -a | grep klam-ssh;
 then
   docker rm $(docker ps -a | grep klam-ssh | awk -F ' ' '{print $1}')
 else
-  echo "container does not exists" | systemd-cat -t klam-ssh
+  echo "container does not exists"
 fi
-echo "grabbing latest image" | systemd-cat -t klam-ssh
+echo "grabbing latest image"
 docker --config=$DIR/.docker/ pull ${IMAGE}
-echo "Creating docker klam-ssh" | systemd-cat -t klam-ssh
+echo "Creating docker klam-ssh"
 docker --config=$DIR/.docker/ create --name klam-ssh "${IMAGE}"
-echo "Copying files to /opt/klam/lib" | systemd-cat -t klam-ssh
+echo "Copying files to /opt/klam/lib"
 docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libnss_klam.so.2.0 /opt/klam/lib
 docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libjansson.a /opt/klam/lib
 docker cp klam-ssh:/tmp/klam-coreos/opt/klam/libjansson.la /opt/klam/lib
@@ -166,23 +171,23 @@ ln -sf /opt/klam/lib/libnss_klam.so.2.0 /opt/klam/lib/libnss_klam.so.2
 ln -sf /opt/klam/lib/libjansson.so.4.7.0 /opt/klam/lib/libnsss_klam.so.4
 ln -sf /opt/klam/lib/libjansson.so.4.7.0 /opt/klam/lib/libnsss_klam.so
 ln -sf /opt/klam/lib/klam_cmd/klam_cmd /opt/klam/nss_klam_data
-echo "Removing docker klam-ssh" | systemd-cat -t klam-ssh
+echo "Removing docker klam-ssh"
 docker rm klam-ssh
 
 # Move the ld.so.conf drop-in file to the correct location so that the new shared
 # library is detected, then update the shared library cache
-echo "Moving the ld.so.conf file to the correct location" | systemd-cat -t klam-ssh
+echo "Moving the ld.so.conf file to the correct location"
 cat << EOT > /etc/ld.so.conf.d/klam.conf
 /opt/klam/lib
 /opt/klam/lib/klam_cmd/
 EOT
 
 # Validate that the files exist in the correct folder
-echo "Validating the /opt/klam/lib/libnss_klam.so* file exists in the correct folder" | systemd-cat -t klam-ssh
+echo "Validating the /opt/klam/lib/libnss_klam.so* file exists in the correct folder"
 ls -l /opt/klam/lib/libnss_klam.so*
 
 # Re-link nsswitch.conf
-echo "Re-linking nsswitch.conf" | systemd-cat -t klam-ssh
+echo "Re-linking nsswitch.conf"
 mv -f /home/core/nsswitch.conf /etc/nsswitch.conf
 cat /etc/nsswitch.conf
 
@@ -195,11 +200,11 @@ cat /etc/nsswitch.conf
 #cat /opt/klam/lib/klam-ato.conf
 
 # Move klam-ssh.conf
-echo "Moving klam-ssh.conf" | systemd-cat -t klam-ssh
+echo "Moving klam-ssh.conf"
 mv -f /home/core/klam-ssh.conf /etc/klam-ssh.conf
 
 #Move klam.sh
-echo "Moving klam.sh" | systemd-cat -t klam-ssh
+echo "Moving klam.sh"
 mv -f /home/core/klam.sh /etc/profile.d/klam.sh
 cat /etc/profile.d/klam.sh
 
@@ -215,7 +220,7 @@ EOT
 chmod 644 /etc/issue.net
 
 #  update /etc/ssh/sshd_config if necessary
-echo "Updating /etc/ssh/sshd_config" | systemd-cat -t klam-ssh
+echo "Updating /etc/ssh/sshd_config"
 cat << EOT > sshd_config
 # Use most defaults for sshd configuration.
 UsePAM yes
@@ -247,9 +252,9 @@ EOT
 mv -f sshd_config /etc/ssh/sshd_config
 chmod 600 /etc/ssh/sshd_config
 
-cat /etc/ssh/sshd_config | systemd-cat -t klam-ssh
+cat /etc/ssh/sshd_config
 
-echo "Setting up PAM modules" | systemd-cat -t klam-ssh
+echo "Setting up PAM modules"
 cat << EOT > system-login
 auth		required        pam_tally2.so file=/var/log/tallylog deny=6 unlock_time=900
 auth        required        pam_nologin.so
@@ -296,30 +301,30 @@ done
 
 
 # Change ownership of authorizedkeys_command
-echo "Changing ownership of authorizedkeys_command to root:root" | systemd-cat -t klam-ssh
+echo "Changing ownership of authorizedkeys_command to root:root"
 chown root:0 $DIR/authorizedkeys_command.sh
 chmod +x $DIR/authorizedkeys_command.sh
 
 # Relocate authorizedkeys_command
-echo "Relocating authorizedkeys_command to /opt/klam/lib" | systemd-cat -t klam-ssh
+echo "Relocating authorizedkeys_command to /opt/klam/lib"
 mv $DIR/authorizedkeys_command.sh /opt/klam/lib
 
 # Change ownership of download_s3
-echo "Changing ownership of download_s3 to root:root" | systemd-cat -t klam-ssh
+echo "Changing ownership of download_s3 to root:root"
 chown root:0 $DIR/download_s3.sh
 chmod +x $DIR/download_s3.sh
 
 # Relocate download_s3.sh have to rename to downloadS3 as reference in python klam lib
-echo "Relocating download_s3 to /opt/klam/lib" | systemd-cat -t klam-ssh
+echo "Relocating download_s3 to /opt/klam/lib"
 mv $DIR/download_s3.sh /opt/klam/lib/downloadS3.sh
 if [ -f /opt/klam/downloadS3 ]; then
-  echo "downloadS3 already linked" | systemd-cat -t klam-ssh
+  echo "downloadS3 already linked"
 else
   ln -s /opt/klam/lib/downloadS3.sh /opt/klam/downloadS3
 fi
 
 if [ -f /usr/sbin/ldconfig ]; then
-  echo "Updating shared library cache" | systemd-cat -t klam-ssh
+  echo "Updating shared library cache"
   /usr/sbin/ldconfig
 fi
 
@@ -334,12 +339,15 @@ chmod 600 /etc/gshadow-
 chmod 600 /etc/shadow-
 
 # Restart SSHD
-echo "Restarting SSHD" | systemd-cat -t klam-ssh
+echo "Restarting SSHD"
 systemctl restart sshd.service
 
 echo "-------Done klam-ssh setup-------"
-while true; do
-  sleep 15
-  # apply permissions for /var/log
-  chmod -R g-wx,o-rwx /var/log/*
-done
+if $DAEMON;then
+  echo "DCOS package install: Daemon mode initiated."
+  while true; do
+    sleep 15
+  done
+else
+  echo "Systemd unit: Completing installation."
+fi

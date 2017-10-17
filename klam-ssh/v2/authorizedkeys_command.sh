@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 USER=$1
 SYSDFILE="/etc/docker/daemon.json"
