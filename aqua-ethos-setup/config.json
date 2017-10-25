@@ -66,6 +66,19 @@
         }
       }
     ],
+    "secret_key_stores": [
+      {
+        "name": "EthosKMS",
+        "type": "kms",
+        "url": "",
+        "token": "ETH_KMS_PASSWORD",
+        "user": "ETH_KMS_USERNAME",
+        "tenant_id": "",
+        "vault_name": "",
+        "enabled": true,
+        "pull_interval": 0
+      }
+    ],
     "settings": [
       {
         "name": "system",

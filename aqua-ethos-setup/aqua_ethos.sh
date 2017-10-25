@@ -57,6 +57,10 @@ function setup {
 		ARTIFACTORY_PREFIX_MC=$(echo $ARTIFACTORY_URL_MC | cut -f3 -d'/')
 	fi
 
+	# Set KMS configs to empty strings if not set
+	if [[ -z "$KMS_USERNAME" ]]; then KMS_USERNAME=""; fi
+	if [[ -z "$KMS_PASSWORD" ]]; then KMS_PASSWORD=""; fi
+
 	log "WEB_URL set to $WEB_URL"
 	log "HC_DIR set to $HC_DIR"
 	log "HEADER set to $HEADER"
@@ -73,6 +77,8 @@ function setup {
 	log "ECR_REGION set to $ECR_REGION"
 	log "ECR_USERNAME set to $ECR_USERNAME"
 	log "ECR_PASSWORD set to ******"
+	log "KMS_USERNAME set to $KMS_USERNAME"
+	log "KMS_PASSWORD set to ******"
 	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
 	log "QUALYS_PASSWORD set to ******"
 	log "SPLUNK_URL set to $SPLUNK_URL"
@@ -173,6 +179,8 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ECR_REGION@${ECR_REGION}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_USERNAME@${ECR_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_PASSWORD@${ECR_PASSWORD}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_KMS_USERNAME@${KMS_USERNAME}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_KMS_PASSWORD@${KMS_PASSWORD}@g" "$CONFIG_FILE"
 
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
 		# Add the new artifactory to the whitelist
