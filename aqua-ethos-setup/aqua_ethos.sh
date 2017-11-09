@@ -99,6 +99,11 @@ function setup {
 	if [[ ! -z "$DELETE_DOCKER_HUB" ]]; then
 		log "DELETE_DOCKER_HUB set to $DELETE_DOCKER_HUB"
 	fi
+
+	if [[ ! -z "$ECR_URL_DEV" ]]; then
+		log "ECR_URL_DEV set to $ECR_URL_DEV"
+		log "ECR_USERNAME_DEV set to $ECR_USERNAME_DEV"
+	fi
 }
 
 function waitForWeb {
@@ -193,6 +198,21 @@ function replaceConfigs {
 		sed -i.bak "s@ETH_MC_ARTIFACTORY_PASSWORD@${ARTIFACTORY_PASSWORD_MC}@g" "$CONFIG_FILE"
 	else
 		# Remove the MC artifactory section
+		cat $CONFIG_FILE | jq 'del(.integration.registries[3])' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+	fi
+
+	# Update or remove the DEV ECR
+	if [[ ! -z "$ECR_URL_DEV" && ! -z "$ECR_USERNAME_DEV" && ! -z "$ECR_PASSWORD_DEV" ]]; then
+		ECR_PREFIX_DEV=$(echo $ECR_URL_DEV | cut -f3 -d'/')
+		ECR_REGION_DEV=$(echo $ECR_URL_DEV | cut -f4 -d'.')
+
+		sed -i.bak "s@ETH_ECR_URL_DEV@${ECR_URL_DEV}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_ECR_PREFIX_DEV@${ECR_PREFIX_DEV}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_ECR_REGION_DEV@${ECR_REGION_DEV}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_ECR_USERNAME_DEV@${ECR_USERNAME_DEV}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_ECR_PASSWORD_DEV@${ECR_PASSWORD_DEV}@g" "$CONFIG_FILE"
+	else
 		cat $CONFIG_FILE | jq 'del(.integration.registries[2])' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
