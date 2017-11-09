@@ -99,6 +99,11 @@ function setup {
 	if [[ ! -z "$DELETE_DOCKER_HUB" ]]; then
 		log "DELETE_DOCKER_HUB set to $DELETE_DOCKER_HUB"
 	fi
+
+	if [[ ! -z "$ECR_URL_DEV" ]]; then
+		log "ECR_URL_DEV set to $ECR_URL_DEV"
+		log "ECR_USERNAME_DEV set to $ECR_USERNAME_DEV"
+	fi
 }
 
 function waitForWeb {
