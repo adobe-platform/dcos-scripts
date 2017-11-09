@@ -50,7 +50,7 @@
         "description": "",
         "author": "administrator",
         "lastupdate": 1494351625,
-        "url": "ETH_ECR_REGION",
+        "url": "ETH_ECR_REGION_DEV",
         "username": "ETH_ECR_USERNAME_DEV",
         "password": "ETH_ECR_PASSWORD_DEV",
         "auto_pull": false,
