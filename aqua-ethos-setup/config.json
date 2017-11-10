@@ -45,19 +45,19 @@
         }
       },
       {
-        "name": "ETH_ECR_PREFIX_DEV",
+        "name": "ETH_ECR_DEV_PREFIX",
         "type": "AWS",
         "description": "",
         "author": "administrator",
         "lastupdate": 1494351625,
-        "url": "ETH_ECR_REGION_DEV",
-        "username": "ETH_ECR_USERNAME_DEV",
-        "password": "ETH_ECR_PASSWORD_DEV",
+        "url": "ETH_ECR_DEV_REGION",
+        "username": "ETH_ECR_DEV_USERNAME",
+        "password": "ETH_ECR_DEV_PASSWORD",
         "auto_pull": false,
         "auto_pull_time": "03:00",
         "auto_pull_max": 100,
         "prefixes": [
-          "ETH_ECR_PREFIX_DEV"
+          "ETH_ECR_DEV_PREFIX"
         ],
         "webhook": {
           "enabled": false,
@@ -150,7 +150,8 @@
         "trusted_base_images_enabled": false,
         "allow_images_with_prefixes": [
           "ETH_ARTIFACTORY_PREFIX",
-          "ETH_ECR_PREFIX"
+          "ETH_ECR_PREFIX",
+          "ETH_ECR_DEV_PREFIX"
         ],
         "allow_images_docker_labels": [],
         "cves_black_list": [
