@@ -85,6 +85,27 @@
           "url": "",
           "auth_token": ""
         }
+      },
+      {
+        "name": "docker-ethos-release.dr-uw2.adobeitc.com",
+        "type": "ART",
+        "description": "",
+        "author": "administrator",
+        "lastupdate": 1491322777,
+        "url": "https://docker-ethos-release.dr-uw2.adobeitc.com",
+        "username": "ETH_ARTIFACTORY_USERNAME",
+        "password": "ETH_ARTIFACTORY_PASSWORD",
+        "auto_pull": false,
+        "auto_pull_time": "03:00",
+        "auto_pull_max": 100,
+        "prefixes": [
+          "docker-ethos-release.dr-uw2.adobeitc.com"
+        ],
+        "webhook": {
+          "enabled": false,
+          "url": "",
+          "auth_token": ""
+        }
       }
     ],
     "secret_key_stores": [
@@ -151,7 +172,8 @@
         "allow_images_with_prefixes": [
           "ETH_ARTIFACTORY_PREFIX",
           "ETH_ECR_PREFIX",
-          "ETH_ECR_DEV_PREFIX"
+          "ETH_ECR_DEV_PREFIX",
+          "docker-ethos-release.dr-uw2.adobeitc.com"
         ],
         "allow_images_docker_labels": [],
         "cves_black_list": [
