@@ -1,5 +1,5 @@
 {
-  "version": "2.1",
+  "version": "2.6",
   "integration": {
     "registries": [
       {
@@ -125,7 +125,7 @@
       {
         "name": "system",
         "type": "system",
-        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"cli_scans_only\": false, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"show_willnotfix\": false, \"scan_executables\": false, \"dynamic_profiling\": {\"enabled\": false, \"stop_after_dur\": 0, \"stop_after_exec\": 0, \"enforce_profiles\": false, \"freeze_after_dur\": 86400000000000, \"freeze_after_exec\": 5}, \"cybercenter_address\": \"https://cybercenter4.aquasec.com\", \"scan_sensitive_data\": false, \"static_binaries_protection\": true}"
+        "settings": "{\"scan_webhook\": {\"url\": \"\", \"enabled\": false}, \"cli_scans_only\": false, \"hosts_deletion\": {\"enabled\": true, \"interval\": 3}, \"scheduled_scan\": {\"days\": [], \"time\": [1, 0], \"daily\": true, \"enabled\": ETH_DAILY_SCAN}, \"show_willnotfix\": false, \"scan_executables\": false, \"dynamic_profiling\": {\"enabled\": false, \"stop_after_dur\": 3600000000000, \"stop_after_exec\": 3, \"enforce_profiles\": false, \"freeze_after_dur\": 86400000000000, \"freeze_after_exec\": 5}, \"gateways_deletion\": {\"enabled\": true, \"interval\": 1}, \"cybercenter_address\": \"https://cybercenter4.aquasec.com\", \"scan_sensitive_data\": false, \"register_modified_images\": false, \"static_binaries_protection\": true, \"audit_full_command_arg_enable\": false}"
       },
       {
         "name": "qualys",
@@ -140,42 +140,44 @@
       {
         "name": "image.policy",
         "type": "image.policy",
-        "settings": "{\"author\": \"administrator\", \"average_score\": 7.5, \"maximum_score\": 8, \"daily_scan_time\": {\"hour\": 1, \"minute\": 0, \"second\": 0}, \"daily_scan_enabled\": true, \"only_none_root_users\": false, \"average_score_enabled\": false, \"maximum_score_enabled\": false, \"only_registered_images\": true, \"cves_black_list_enabled\": true, \"agent_image_scan_enabled\": false, \"packages_black_list_enabled\": false, \"trusted_base_images_enabled\": false}"
+        "settings": "{\"author\": \"administrator\", \"average_score\": 7.5, \"maximum_score\": 8, \"daily_scan_time\": {\"hour\": 1, \"minute\": 0, \"second\": 0}, \"daily_scan_enabled\": ETH_DAILY_SCAN, \"only_none_root_users\": false, \"average_score_enabled\": false, \"maximum_score_enabled\": false, \"only_registered_images\": true, \"cves_black_list_enabled\": true, \"agent_image_scan_enabled\": false, \"packages_black_list_enabled\": false, \"trusted_base_images_enabled\": false}"
       },
       {
         "name": "runtime_policy",
         "type": "runtime.policy",
-        "settings": "{\"enable_fork_guard\": false, \"block_nw_unlink_cont\": true, \"enable_ip_reputation\": true, \"default_security_profile\": \"Ethos\", \"fork_guard_process_limit\": 100, \"enable_port_scan_protection\": true}"
+        "settings": "{\"enable_fork_guard\": true, \"block_nw_unlink_cont\": true, \"enable_ip_reputation\": true, \"default_security_profile\": \"Ethos\", \"fork_guard_process_limit\": 100, \"enable_port_scan_protection\": true}"
+      },
+      {
+        "name": "only_registered_images",
+        "type": "only_registered_images",
+        "settings": "{\"enabled\": true, \"allow_images_docker_labels\": null, \"allow_images_with_prefixes\": [\"ETH_ARTIFACTORY_PREFIX\",\"ETH_ECR_PREFIX\",\"ETH_ECR_DEV_PREFIX\",\"docker-ethos-release.dr-uw2.adobeitc.com\"ETH_PREFIXES_EXTRA]}"
       }
     ]
   },
   "policies": {
     "image_assurance": [
       {
-        "only_registered_images": true,
-        "daily_scan_enabled": true,
-        "daily_scan_time": {
-          "hour": 1,
-          "minute": 0,
-          "second": 0
-        },
-        "average_score_enabled": false,
-        "average_score": 7.5,
+        "id": 1,
+        "name": "default",
+        "description": "",
+        "registries": null,
+        "labels": null,
+        "images": [
+          "*"
+        ],
+        "cvss_severity_enabled": false,
+        "cvss_severity": "",
         "maximum_score_enabled": false,
+        "custom_checks_enabled": false,
         "maximum_score": 8,
         "cves_black_list_enabled": true,
         "packages_black_list_enabled": false,
+        "packages_white_list_enabled": false,
         "author": "administrator",
-        "agent_image_scan_enabled": false,
         "only_none_root_users": false,
         "trusted_base_images_enabled": false,
-        "allow_images_with_prefixes": [
-          "ETH_ARTIFACTORY_PREFIX",
-          "ETH_ECR_PREFIX",
-          "ETH_ECR_DEV_PREFIX",
-          "docker-ethos-release.dr-uw2.adobeitc.com"
-        ],
-        "allow_images_docker_labels": [],
+        "lastupdate": "2017-12-01T15:23:25.832014Z",
+        "custom_checks": null,
         "cves_black_list": [
           "CVE-2012-1723",
           "CVE-2013-2465",
@@ -186,6 +188,7 @@
           "CVE-2016-2842"
         ],
         "packages_black_list": null,
+        "packages_white_list": null,
         "allowed_images": null,
         "trusted_base_images": null
       }
@@ -300,7 +303,7 @@
       }
     ],
     "user_access_control": [
-      "{\"name\": \"ethos\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.0\", \"accessors\": {\"users\": [ETH_DOCKER_ADMINS], \"groups\": [\"core\"]}, \"resources\": {\"apps\": [\"*\"], \"nodes\": [\"*\"], \"images\": [\"*\"], \"secrets\": [\"*\"], \"volumes\": [\"*\"], \"networks\": [\"*\"], \"services\": [\"*\"], \"containers\": [\"*\"], \"aqua_labels\": [\"*\"]}, \"lastupdate\": 1491249828, \"description\": \"\"}"
+      "{\"name\": \"ethos\", \"role\": \"administrator\", \"author\": \"administrator\", \"version\": \"2.6\", \"accessors\": {\"users\": [ETH_DOCKER_ADMINS], \"groups\": [\"core\"]}, \"resources\": {\"apps\": [\"*\"], \"nodes\": [\"*\"], \"images\": [\"*\"], \"secrets\": [\"*\"], \"volumes\": [\"*\"], \"networks\": [\"*\"], \"services\": [\"*\"], \"containers\": [\"*\"], \"aqua_labels\": [\"*\"]}, \"lastupdate\": 1491249828, \"description\": \"\"}"
     ]
   },
   "images": [],
