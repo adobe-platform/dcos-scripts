@@ -187,10 +187,11 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_KMS_USERNAME@${KMS_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_KMS_PASSWORD@${KMS_PASSWORD}@g" "$CONFIG_FILE"
 
+	PREFIXES_EXTRA=""
+
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
 		# Add the new artifactory to the whitelist
-		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["ETH_MC_ARTIFACTORY_PREFIX"]' > $CONFIG_FILE.bak
-		mv $CONFIG_FILE.bak $CONFIG_FILE
+		PREFIXES_EXTRA=",\\\\\"$ARTIFACTORY_PREFIX_MC\\\\\""
 
 		sed -i.bak "s@ETH_MC_ARTIFACTORY_URL@${ARTIFACTORY_URL_MC}@g" "$CONFIG_FILE"
 		sed -i.bak "s@ETH_MC_ARTIFACTORY_PREFIX@${ARTIFACTORY_PREFIX_MC}@g" "$CONFIG_FILE"
@@ -222,9 +223,11 @@ function replaceConfigs {
 		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
 	else
 		#Add DockerHub Prefix
-		cat $CONFIG_FILE | jq '.policies.image_assurance[0].allow_images_with_prefixes |= .+ ["adobeplatform"] + ["behance"] + ["index.docker.io"]' > $CONFIG_FILE.bak
-		mv $CONFIG_FILE.bak $CONFIG_FILE
+		PREFIXES_EXTRA="$PREFIXES_EXTRA,\\\\\"adobeplatform\\\\\",\\\\\"behance\\\\\",\\\\\"index.docker.io\\\\\""
 	fi
+
+	# Add the extra prefixes if any
+	sed -i.bak "s@ETH_PREFIXES_EXTRA@${PREFIXES_EXTRA}@g" "$CONFIG_FILE"
 
 	# Update the encryption mode
 	# cat $CONFIG_FILE | jq -r '. | select(policies.security_profiles[].name=="Ethos") | .encrypt_all_envs |= '$ENCRYPT_ENV_VARS''
@@ -236,8 +239,7 @@ function replaceConfigs {
 	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Update the daily scan
-	cat $CONFIG_FILE | jq '.policies.image_assurance[0].daily_scan_enabled = '$DAILY_SCAN_ENABLED'' > $CONFIG_FILE.bak
-	mv $CONFIG_FILE.bak $CONFIG_FILE
+	sed -i.bak "s@ETH_DAILY_SCAN@${DAILY_SCAN_ENABLED}@g" "$CONFIG_FILE"
 
 	# Empty out the images array in case it already exists
 	log "Clearing the old images array"
