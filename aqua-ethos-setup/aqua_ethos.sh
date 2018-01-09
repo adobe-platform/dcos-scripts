@@ -221,6 +221,7 @@ function replaceConfigs {
 	if [[ "$DELETE_DOCKER_HUB" == true ]]; then
 		# Remove the Docker Hub section
 		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/Docker%20Hub
+		curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X DELETE $WEB_URL/registries/hub.docker.io
 	else
 		#Add DockerHub Prefix
 		PREFIXES_EXTRA="$PREFIXES_EXTRA,\\\\\"adobeplatform\\\\\",\\\\\"behance\\\\\",\\\\\"index.docker.io\\\\\""
