@@ -106,6 +106,25 @@
           "url": "",
           "auth_token": ""
         }
+      },
+      {
+        "name": "hub.docker.io",
+        "type": "HUB",
+        "detected_type": 3,
+        "description": "",
+        "author": "administrator",
+        "lastupdate": 1515377603,
+        "url": "",
+        "username": "",
+        "auto_pull": false,
+        "auto_pull_time": "03:00",
+        "auto_pull_max": 100,
+        "prefixes": null,
+        "webhook": {
+          "enabled": false,
+          "url": "",
+          "auth_token": ""
+        }
       }
     ],
     "secret_key_stores": [
