@@ -12,6 +12,7 @@ function setup {
 	if [[ -z "$HC_DIR" ]]; then log "HC_DIR environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$PASSWORD" ]]; then log "PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$FD_PASSWORD" ]]; then log "FD_PASSWORD environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$DATADOG_PASSWORD" ]]; then log "DATADOG_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$AUDITOR_PASSWORD" ]]; then log "AUDITOR_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SCANNER_PASSWORD" ]]; then log "SCANNER_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_URL" ]]; then log "ARTIFACTORY_URL environment variable required. Exiting..." && exit 1; fi
@@ -66,6 +67,7 @@ function setup {
 	log "HEADER set to $HEADER"
 	log "PASSWORD set to ******"
 	log "FD_PASSWORD set to ******"
+	log "DATADOG_PASSWORD set to ******"
 	log "AUDITOR_PASSWORD set to ******"
 	log "SCANNER_PASSWORD set to ******"
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
@@ -290,6 +292,7 @@ fi
 
 }
 
+createUser "datadog" "datadog" "Datadog" "$DATADOG_PASSWORD" "administrator"
 createUser "auditor" "auditor" "Auditor" "$AUDITOR_PASSWORD" "auditor"
 createUser "flight-director" "flight-director" "FlightDirector" "$FD_PASSWORD" "administrator"
 createUser "scanner" "scanner" "Scanner" "$SCANNER_PASSWORD" "scanner"
