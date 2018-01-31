@@ -66,6 +66,7 @@ function setup {
 	log "HEADER set to $HEADER"
 	log "PASSWORD set to ******"
 	log "FD_PASSWORD set to ******"
+	if [[ ! -z "$DATADOG_PASSWORD" ]]; then log "DATADOG_PASSWORD set to ******"; fi
 	log "AUDITOR_PASSWORD set to ******"
 	log "SCANNER_PASSWORD set to ******"
 	log "ARTIFACTORY_URL set to $ARTIFACTORY_URL"
@@ -290,6 +291,9 @@ fi
 
 }
 
+if [[ ! -z "$DATADOG_PASSWORD" ]]; then
+	createUser "datadog" "datadog" "Datadog" "$DATADOG_PASSWORD" "administrator"
+fi
 createUser "auditor" "auditor" "Auditor" "$AUDITOR_PASSWORD" "auditor"
 createUser "flight-director" "flight-director" "FlightDirector" "$FD_PASSWORD" "administrator"
 createUser "scanner" "scanner" "Scanner" "$SCANNER_PASSWORD" "scanner"
