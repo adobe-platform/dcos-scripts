@@ -261,6 +261,11 @@ function replaceConfigs {
 	    cat $CONFIG_FILE | jq '.images |= .+ [{"Name":"'$IMAGE'","Repository":"'$REPO'","PolicyName":"","Registry":"$ARTIFACTORY_PREFIX","Labels":["production_approved"]}]' > $CONFIG_FILE.bak
 	    mv $CONFIG_FILE.bak $CONFIG_FILE
 	done
+
+	if [[ "$DISABLE_NET_RAW" == true ]]; then
+		cat $CONFIG_FILE | jq '.policies.security_profiles[0].drop_capabilities = ["NET_RAW"]' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+	fi
 }
 
 setup
