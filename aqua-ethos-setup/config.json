@@ -164,7 +164,7 @@
       {
         "name": "runtime_policy",
         "type": "runtime.policy",
-        "settings": "{\"enable_fork_guard\": true, \"block_nw_unlink_cont\": true, \"enable_ip_reputation\": true, \"default_security_profile\": \"Ethos\", \"fork_guard_process_limit\": 100, \"enable_port_scan_protection\": true}"
+        "settings": "{\"enable_fork_guard\": true, \"block_nw_unlink_cont\": true, \"enable_ip_reputation\": true, \"default_security_profile\": \"Ethos\", \"fork_guard_process_limit\": ETH_FORK_GUARD_LIMIT, \"enable_port_scan_protection\": true}"
       },
       {
         "name": "only_registered_images",
@@ -216,7 +216,7 @@
       {
         "default_security_profile": "Ethos",
         "enable_fork_guard": true,
-        "fork_guard_process_limit": 100,
+        "fork_guard_process_limit": "ETH_FORK_GUARD_LIMIT",
         "enable_ip_reputation": true,
         "enable_port_scan_protection": true,
         "block_nw_unlink_cont": true

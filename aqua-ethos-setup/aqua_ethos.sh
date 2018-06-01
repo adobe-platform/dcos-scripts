@@ -28,6 +28,7 @@ function setup {
 	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$STATIC_BINARIES_PROTECTION" ]]; then log "STATIC_BINARIES_PROTECTION environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$DAILY_SCAN_ENABLED" ]]; then log "DAILY_SCAN_ENABLED environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$FORK_GUARD_LIMIT" ]]; then log "FORK_GUARD_LIMIT environment variable required. Exiting..." && exit 1; fi
 
 	if [[ -z "$HEADER" ]]; then
 		log "HEADER environment variable not provided. Setting to 'Authorization'."
@@ -87,6 +88,7 @@ function setup {
 	log "SPLUNK_TOKEN set to ******"
 	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
 	log "DAILY_SCAN_ENABLED set to $DAILY_SCAN_ENABLED"
+	log "FORK_GUARD_LIMIT set to $FORK_GUARD_LIMIT"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
 
@@ -242,6 +244,10 @@ function replaceConfigs {
 
 	# Update the daily scan
 	sed -i.bak "s@ETH_DAILY_SCAN@${DAILY_SCAN_ENABLED}@g" "$CONFIG_FILE"
+	
+        # Update the fork guard limit process
+	sed -i.bak "s@ETH_FORK_GUARD_LIMIT@${FORK_GUARD_LIMIT}@g" "$CONFIG_FILE"
+ 
 
 	# Empty out the images array in case it already exists
 	log "Clearing the old images array"
