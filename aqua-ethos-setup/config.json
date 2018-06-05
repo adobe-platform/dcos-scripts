@@ -216,7 +216,6 @@
       {
         "default_security_profile": "Ethos",
         "enable_fork_guard": true,
-        "fork_guard_process_limit": ETH_FORK_GUARD_LIMIT,
         "enable_ip_reputation": true,
         "enable_port_scan_protection": true,
         "block_nw_unlink_cont": true

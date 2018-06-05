@@ -245,9 +245,11 @@ function replaceConfigs {
 	# Update the daily scan
 	sed -i.bak "s@ETH_DAILY_SCAN@${DAILY_SCAN_ENABLED}@g" "$CONFIG_FILE"
 	
-        # Update the fork guard limit process
+    # Update the fork guard limit process
 	sed -i.bak "s@ETH_FORK_GUARD_LIMIT@${FORK_GUARD_LIMIT}@g" "$CONFIG_FILE"
- 
+
+	cat $CONFIG_FILE | jq '.policies.threat_mitigation[0].fork_guard_process_limit = '$FORK_GUARD_LIMIT'' > $CONFIG_FILE.bak
+	mv $CONFIG_FILE.bak $CONFIG_FILE
 
 	# Empty out the images array in case it already exists
 	log "Clearing the old images array"
