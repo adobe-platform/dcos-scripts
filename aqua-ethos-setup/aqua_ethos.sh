@@ -18,8 +18,6 @@ function setup {
 	if [[ -z "$ARTIFACTORY_USERNAME" ]]; then log "ARTIFACTORY_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ECR_URL" ]]; then log "ECR_URL environment variable required. Exiting..." && exit 1; fi
-	if [[ -z "$ECR_USERNAME" ]]; then log "ECR_USERNAME environment variable required. Exiting..." && exit 1; fi
-	if [[ -z "$ECR_PASSWORD" ]]; then log "ECR_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_USERNAME" ]]; then log "QUALYS_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_PASSWORD" ]]; then log "QUALYS_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SPLUNK_URL" ]]; then log "SPLUNK_URL environment variable required. Exiting..." && exit 1; fi
@@ -235,7 +233,6 @@ function replaceConfigs {
 		cat $CONFIG_FILE | jq 'del(.integration.registries[2].username, .integration.registries[2].password)' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
-
 
 	if [[ "$DELETE_DOCKER_HUB" == true ]]; then
 		# Remove the Docker Hub section
