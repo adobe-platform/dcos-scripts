@@ -18,8 +18,6 @@ function setup {
 	if [[ -z "$ARTIFACTORY_USERNAME" ]]; then log "ARTIFACTORY_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ARTIFACTORY_PASSWORD" ]]; then log "ARTIFACTORY_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ECR_URL" ]]; then log "ECR_URL environment variable required. Exiting..." && exit 1; fi
-	if [[ -z "$ECR_USERNAME" ]]; then log "ECR_USERNAME environment variable required. Exiting..." && exit 1; fi
-	if [[ -z "$ECR_PASSWORD" ]]; then log "ECR_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_USERNAME" ]]; then log "QUALYS_USERNAME environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$QUALYS_PASSWORD" ]]; then log "QUALYS_PASSWORD environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SPLUNK_URL" ]]; then log "SPLUNK_URL environment variable required. Exiting..." && exit 1; fi
@@ -77,8 +75,10 @@ function setup {
 	log "ECR_URL set to $ECR_URL"
 	log "ECR_PREFIX set to $ECR_PREFIX"
 	log "ECR_REGION set to $ECR_REGION"
-	log "ECR_USERNAME set to $ECR_USERNAME"
-	log "ECR_PASSWORD set to ******"
+
+	if [[ ! -z "$ECR_USERNAME" ]]; then log "ECR_USERNAME set to $ECR_USERNAME"; fi
+	if [[ ! -z "$ECR_PASSWORD" ]]; then log "ECR_PASSWORD set to ******"; fi
+
 	log "KMS_USERNAME set to $KMS_USERNAME"
 	log "KMS_PASSWORD set to ******"
 	log "QUALYS_USERNAME set to $QUALYS_USERNAME"
@@ -105,7 +105,6 @@ function setup {
 
 	if [[ ! -z "$ECR_URL_DEV" ]]; then
 		log "ECR_URL_DEV set to $ECR_URL_DEV"
-		log "ECR_USERNAME_DEV set to $ECR_USERNAME_DEV"
 	fi
 }
 
@@ -185,10 +184,17 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_ECR_URL@${ECR_URL}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_PREFIX@${ECR_PREFIX}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_ECR_REGION@${ECR_REGION}@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_ECR_USERNAME@${ECR_USERNAME}@g" "$CONFIG_FILE"
-	sed -i.bak "s@ETH_ECR_PASSWORD@${ECR_PASSWORD}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_KMS_USERNAME@${KMS_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_KMS_PASSWORD@${KMS_PASSWORD}@g" "$CONFIG_FILE"
+
+	if [[ ! -z "$ECR_USERNAME" && ! -z "$ECR_PASSWORD" ]]; then
+		sed -i.bak "s@ETH_ECR_USERNAME@${ECR_USERNAME}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_ECR_PASSWORD@${ECR_PASSWORD}@g" "$CONFIG_FILE"
+	else
+		cat $CONFIG_FILE | jq 'del(.integration.registries[1].username, .integration.registries[1].password)' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE
+	fi
+
 
 	PREFIXES_EXTRA=""
 
@@ -206,18 +212,27 @@ function replaceConfigs {
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
-	# Update or remove the DEV ECR
-	if [[ ! -z "$ECR_URL_DEV" && ! -z "$ECR_USERNAME_DEV" && ! -z "$ECR_PASSWORD_DEV" ]]; then
+	# update ECR DEV URL
+	if [[ ! -z "$ECR_URL_DEV" ]]; then
 		ECR_PREFIX_DEV=$(echo $ECR_URL_DEV | cut -f3 -d'/')
 		ECR_REGION_DEV=$(echo $ECR_URL_DEV | cut -f4 -d'.')
 
 		sed -i.bak "s@ETH_ECR_DEV_URL@${ECR_URL_DEV}@g" "$CONFIG_FILE"
+
 		sed -i.bak "s@ETH_ECR_DEV_PREFIX@${ECR_PREFIX_DEV}@g" "$CONFIG_FILE"
 		sed -i.bak "s@ETH_ECR_DEV_REGION@${ECR_REGION_DEV}@g" "$CONFIG_FILE"
-		sed -i.bak "s@ETH_ECR_DEV_USERNAME@${ECR_USERNAME_DEV}@g" "$CONFIG_FILE"
-		sed -i.bak "s@ETH_ECR_DEV_PASSWORD@${ECR_PASSWORD_DEV}@g" "$CONFIG_FILE"
 	else
 		cat $CONFIG_FILE | jq 'del(.integration.registries[2])' > $CONFIG_FILE.bak
+		mv $CONFIG_FILE.bak $CONFIG_FILE		
+	fi
+
+	# Update or remove the DEV ECR Creds
+	if [[ ! -z "$ECR_URL_DEV" && ! -z "$ECR_USERNAME_DEV" && ! -z "$ECR_PASSWORD_DEV" ]]; then
+		sed -i.bak "s@ETH_ECR_DEV_USERNAME@${ECR_USERNAME_DEV}@g" "$CONFIG_FILE"
+		sed -i.bak "s@ETH_ECR_DEV_PASSWORD@${ECR_PASSWORD_DEV}@g" "$CONFIG_FILE"
+
+	else
+		cat $CONFIG_FILE | jq 'del(.integration.registries[2].username, .integration.registries[2].password)' > $CONFIG_FILE.bak
 		mv $CONFIG_FILE.bak $CONFIG_FILE
 	fi
 
