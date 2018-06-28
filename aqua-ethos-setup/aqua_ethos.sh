@@ -199,17 +199,18 @@ function replaceConfigs {
 		mv $CONFIG_FILE.bak $CONFIG_FILE	
 	fi
 
-	# Update or remove the DEV ECR
-	if [[ ! -z "$ECR_URL_DEV" && ! -z "$ECR_USERNAME_DEV" && ! -z "$ECR_PASSWORD_DEV" ]]; then
-		ECR_PREFIX_DEV=$(echo $ECR_URL_DEV | cut -f3 -d'/')
-		ECR_REGION_DEV=$(echo $ECR_URL_DEV | cut -f4 -d'.')
+	if [[ ! -z "$ECR_URL_DEV" ]]; then
+	# update ECR DEV URL
+ 		ECR_PREFIX_DEV=$(echo $ECR_URL_DEV | cut -f3 -d'/')
+ 		ECR_REGION_DEV=$(echo $ECR_URL_DEV | cut -f4 -d'.')
+ 
+ 		sed -i.bak "s@ETH_ECR_DEV_URL@${ECR_URL_DEV}@g" "$CONFIG_FILE"
 
-		sed -i.bak "s@ETH_ECR_DEV_URL@${ECR_URL_DEV}@g" "$CONFIG_FILE"
-		sed -i.bak "s@ETH_ECR_DEV_PREFIX@${ECR_PREFIX_DEV}@g" "$CONFIG_FILE"
-		sed -i.bak "s@ETH_ECR_DEV_REGION@${ECR_REGION_DEV}@g" "$CONFIG_FILE"
+ 		sed -i.bak "s@ETH_ECR_DEV_PREFIX@${ECR_PREFIX_DEV}@g" "$CONFIG_FILE"
+ 		sed -i.bak "s@ETH_ECR_DEV_REGION@${ECR_REGION_DEV}@g" "$CONFIG_FILE"
 	else
 		cat $CONFIG_FILE | jq 'del(.integration.registries[2])' > $CONFIG_FILE.bak
-		mv $CONFIG_FILE.bak $CONFIG_FILE
+		mv $CONFIG_FILE.bak $CONFIG_FILE		
 	fi
 
 	if [[ "$DELETE_DOCKER_HUB" == true ]]; then
