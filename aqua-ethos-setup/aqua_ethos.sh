@@ -29,6 +29,8 @@ function setup {
 	if [[ -z "$STATIC_BINARIES_PROTECTION" ]]; then log "STATIC_BINARIES_PROTECTION environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$DAILY_SCAN_ENABLED" ]]; then log "DAILY_SCAN_ENABLED environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$FORK_GUARD_LIMIT" ]]; then log "FORK_GUARD_LIMIT environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$CLUSTER_NAME" ]]; then log "CLUSTER_NAME environment variable required. Exiting..." && exit 1; fi
+
 
 	if [[ -z "$HEADER" ]]; then
 		log "HEADER environment variable not provided. Setting to 'Authorization'."
@@ -89,6 +91,7 @@ function setup {
 	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
 	log "DAILY_SCAN_ENABLED set to $DAILY_SCAN_ENABLED"
 	log "FORK_GUARD_LIMIT set to $FORK_GUARD_LIMIT"
+	log "CLUSTER_NAME set to $CLUSTER_NAME"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
 
@@ -250,7 +253,9 @@ function replaceConfigs {
 
 	cat $CONFIG_FILE | jq '.policies.threat_mitigation[0].fork_guard_process_limit = '$FORK_GUARD_LIMIT'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
-
+    
+    sed -i.bak "s@ETH_CLUSTER_NAME@${CLUSTER_NAME}@g" "$CONFIG_FILE"
+	
 	# Empty out the images array in case it already exists
 	log "Clearing the old images array"
 	cat $CONFIG_FILE | jq '.images |= []' > $CONFIG_FILE.bak
