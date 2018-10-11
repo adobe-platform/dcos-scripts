@@ -30,6 +30,7 @@ function setup {
 	if [[ -z "$DAILY_SCAN_ENABLED" ]]; then log "DAILY_SCAN_ENABLED environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$FORK_GUARD_LIMIT" ]]; then log "FORK_GUARD_LIMIT environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$CLUSTER_NAME" ]]; then log "CLUSTER_NAME environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$AQUA_WEBHOOK_ENDPOINT" ]]; then log "AQUA_WEBHOOK_ENDPOINT variable not provided. No webhook will be configured in aqua for daily CVEs"; fi
 
 
 	if [[ -z "$HEADER" ]]; then
@@ -94,6 +95,7 @@ function setup {
 	log "CLUSTER_NAME set to $CLUSTER_NAME"
 	log "APPROVED_IMAGES set to $APPROVED_IMAGES"
 	log "DOCKER_ADMINS set to $DOCKER_ADMINS"
+	log "AQUA_WEBHOOK_ENDPOINT set to $AQUA_WEBHOOK_ENDPOINT"
 
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
 		log "ARTIFACTORY_URL_MC set to $ARTIFACTORY_URL_MC"
@@ -193,6 +195,18 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_KMS_USERNAME@${KMS_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_KMS_PASSWORD@${KMS_PASSWORD}@g" "$CONFIG_FILE"
 
+	if [[ -z "$AQUA_WEBHOOK_ENDPOINT" ]]; then
+		AQUA_WEBHOOK_ENDPOINT_PROVIDED=true
+		WEBHOOK_URL="$AQUA_WEBHOOK_ENDPOINT?token=$SPLUNK_TOKEN&index=ethos_aqua&cluster=$CLUSTER_NAME"
+	else
+		AQUA_WEBHOOK_ENDPOINT_PROVIDED=false
+		WEBHOOK_URL=""
+	fi
+
+	sed -i.bak "s@ETH_AQUA_WEBHOOK_ENDPOINT_PROVIDED@${AQUA_WEBHOOK_ENDPOINT_PROVIDED}@g" "$CONFIG_FILE"
+	sed -i.bak "s@ETH_AQUA_WEBHOOK_ENDPOINT@${WEBHOOK_URL}@g" "$CONFIG_FILE"
+
+
 	PREFIXES_EXTRA=""
 
 	if [[ ! -z "$ARTIFACTORY_URL_MC" ]]; then
@@ -254,8 +268,6 @@ function replaceConfigs {
 	cat $CONFIG_FILE | jq '.policies.threat_mitigation[0].fork_guard_process_limit = '$FORK_GUARD_LIMIT'' > $CONFIG_FILE.bak
 	mv $CONFIG_FILE.bak $CONFIG_FILE
     
-    sed -i.bak "s@ETH_CLUSTER_NAME@${CLUSTER_NAME}@g" "$CONFIG_FILE"
-	
 	# Empty out the images array in case it already exists
 	log "Clearing the old images array"
 	cat $CONFIG_FILE | jq '.images |= []' > $CONFIG_FILE.bak
