@@ -195,7 +195,7 @@ function replaceConfigs {
 	sed -i.bak "s@ETH_KMS_USERNAME@${KMS_USERNAME}@g" "$CONFIG_FILE"
 	sed -i.bak "s@ETH_KMS_PASSWORD@${KMS_PASSWORD}@g" "$CONFIG_FILE"
 
-	if [[ -z "$AQUA_WEBHOOK_ENDPOINT" ]]; then
+	if [[ ! -z "$AQUA_WEBHOOK_ENDPOINT" ]]; then
 		AQUA_WEBHOOK_ENDPOINT_PROVIDED=true
 		WEBHOOK_URL="$AQUA_WEBHOOK_ENDPOINT?token=$SPLUNK_TOKEN&index=ethos_aqua&cluster=$CLUSTER_NAME"
 	else
