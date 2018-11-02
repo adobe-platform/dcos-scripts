@@ -197,7 +197,7 @@ function replaceConfigs {
 
 	if [[ ! -z "$AQUA_WEBHOOK_ENDPOINT" ]]; then
 		AQUA_WEBHOOK_ENDPOINT_PROVIDED=true
-		WEBHOOK_URL="$AQUA_WEBHOOK_ENDPOINT?token=$SPLUNK_TOKEN&index=ethos_aqua&cluster=$CLUSTER_NAME"
+		WEBHOOK_URL="$AQUA_WEBHOOK_ENDPOINT?token=$SPLUNK_TOKEN\&\index=ethos_aqua\&\cluster=$CLUSTER_NAME"
 	else
 		AQUA_WEBHOOK_ENDPOINT_PROVIDED=false
 		WEBHOOK_URL=""
