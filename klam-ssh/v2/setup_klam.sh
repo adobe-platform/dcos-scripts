@@ -89,23 +89,23 @@ cat << EOT > /home/core/nsswitch.conf
 #
 # /etc/nsswitch.conf
 #
-passwd:     files usrfiles klam
-shadow:     files usrfiles klam
-group:      files usrfiles klam
+passwd:      files usrfiles sss systemd klam
+shadow:      files usrfiles sss klam
+group:       files usrfiles sss systemd klam
 
-hosts:      files usrfiles resolv dns
-networks:   files usrfiles dns
+hosts:       files usrfiles resolve dns myhostname
+networks:    files usrfiles dns
 
-services:   files usrfiles
-protocols:  files usrfiles
-rpc:        files usrfiles
+services:    files usrfiles
+protocols:   files usrfiles
+rpc:         files usrfiles
 
-ethers:     files
-netmasks:   files
-netgroup:   files
-bootparams: files
-automount:  files
-aliases:    files
+ethers:      files
+netmasks:    files
+netgroup:    files
+bootparams:  files
+automount:   files
+aliases:     files
 EOT
 
 # create klam-ssh.conf
