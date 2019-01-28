@@ -25,6 +25,8 @@ function setup {
 	if [[ -z "$SPLUNK_URL" ]]; then log "SPLUNK_URL environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SPLUNK_INDEX" ]]; then log "SPLUNK_INDEX environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$SPLUNK_TOKEN" ]]; then log "SPLUNK_TOKEN environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$CVE_SPLUNK_TOKEN" ]]; then log "CVE_SPLUNK_TOKEN environment variable required. Exiting..." && exit 1; fi
+	if [[ -z "$CVE_INDEX" ]]; then log "CVE_INDEX environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$ENCRYPT_ENV_VARS" ]]; then log "ENCRYPT_ENV_VARS environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$STATIC_BINARIES_PROTECTION" ]]; then log "STATIC_BINARIES_PROTECTION environment variable required. Exiting..." && exit 1; fi
 	if [[ -z "$DAILY_SCAN_ENABLED" ]]; then log "DAILY_SCAN_ENABLED environment variable required. Exiting..." && exit 1; fi
@@ -89,6 +91,8 @@ function setup {
 	log "SPLUNK_URL set to $SPLUNK_URL"
 	log "SPLUNK_INDEX set to $SPLUNK_INDEX"
 	log "SPLUNK_TOKEN set to ******"
+	log "CVE_SPLUNK_TOKEN set to ******"
+	log "CVE_INDEX set to $CVE_INDEX"
 	log "ENCRYPT_ENV_VARS set to $ENCRYPT_ENV_VARS"
 	log "DAILY_SCAN_ENABLED set to $DAILY_SCAN_ENABLED"
 	log "FORK_GUARD_LIMIT set to $FORK_GUARD_LIMIT"
@@ -197,7 +201,7 @@ function replaceConfigs {
 
 	if [[ ! -z "$AQUA_WEBHOOK_ENDPOINT" ]]; then
 		AQUA_WEBHOOK_ENDPOINT_PROVIDED=true
-		WEBHOOK_URL="$AQUA_WEBHOOK_ENDPOINT?token=$SPLUNK_TOKEN\&index=ethos_aqua\&cluster=$CLUSTER_NAME"
+		WEBHOOK_URL="$AQUA_WEBHOOK_ENDPOINT?token=$CVE_SPLUNK_TOKEN\&index=$CVE_INDEX\&cluster=$CLUSTER_NAME"
 	else
 		AQUA_WEBHOOK_ENDPOINT_PROVIDED=false
 		WEBHOOK_URL=""
