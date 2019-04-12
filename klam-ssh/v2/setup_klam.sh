@@ -13,6 +13,7 @@ function usage {
     echo "       -e|--encryption-id          The encryption ID"
     echo "       -k|--encryption-key         The encryption key"
     echo "       -p|--key-location-prefix    The encryption ID"
+    echo "       -n|--node-type              The node type"
     echo "       -i|--image                  The KLAM SSH docker image"
     echo "       -q|--quit                   Quit on installation"
     echo "       -h|--help                   Show this message"
@@ -46,6 +47,9 @@ case $key in
     -p|--key-location-prefix)
     KEY_LOCATION_PREFIX="$2"
     shift;;
+    -n|--node-type)
+    NODE_TYPE="$2"
+    shift;;
     -i|--image)
     IMAGE="$2"
     shift;;
@@ -59,7 +63,7 @@ esac
 shift # past argument or value
 done
 
-if [[ -r $REGION || -z $ROLE_NAME || -g $IAM_GROUP_NAME || -z $ENCRYPTION_ID || -z $ENCRYPTION_KEY || -z $KEY_LOCATION_PREFIX || -z $IMAGE ]]; then
+if [[ -r $REGION || -z $ROLE_NAME || -g $IAM_GROUP_NAME || -z $ENCRYPTION_ID || -z $ENCRYPTION_KEY || -z $KEY_LOCATION_PREFIX || -z $NODE_TYPE || -z $IMAGE ]]; then
   usage
 fi
 
@@ -144,6 +148,7 @@ ENCRYPTION_ID=${ENCRYPTION_ID}
 ENCRYPTION_KEY=${ENCRYPTION_KEY}
 KEY_LOCATION_PREFIX=${KEY_LOCATION_PREFIX}
 IMAGE=${IMAGE}
+NODE_TYPE=${NODE_TYPE}
 EOT
 
 # Klam-ssh requires a shared library to be resident on the host.  These
@@ -247,7 +252,7 @@ HostbasedAuthentication no
 LogLevel INFO
 PermitUserEnvironment no
 DenyUsers root
-AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print $0 }') ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F     "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN
+AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print $0 }') ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F     "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(if [ "$NODE_TYPE" == "public" ]; then echo GRP-ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_UTILITY_USERS ;fi)
 EOT
 mv -f sshd_config /etc/ssh/sshd_config
 chmod 600 /etc/ssh/sshd_config
