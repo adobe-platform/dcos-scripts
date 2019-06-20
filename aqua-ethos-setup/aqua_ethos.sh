@@ -168,6 +168,15 @@ function makePost {
 	fi
 }
 
+function makePut {
+	curl --silent -H "Content-Type: application/json" -H "$HEADER: Bearer $TOKEN" -X PUT -d "$2" "$WEB_URL/$1"
+
+	if [[ "$?" != "0" ]]; then
+		log "Error sending PUT to Aqua"
+		exit 1
+	fi
+}
+
 function getExistingImages {
 	EXISTING_IMAGES=$(curl --silent -H "$HEADER: Bearer $TOKEN" "$WEB_URL/settings/export" --data-binary '["images"]')
 }
@@ -324,6 +333,9 @@ if [[ "$USER" == "200" ]]; then
 fi
 
 }
+
+# Update the enforcers
+makePut "hostsbatch?update_enforcers=true" '{"network_protection": "true"}'
 
 if [[ ! -z "$DATADOG_PASSWORD" ]]; then
 	createUser "datadog" "datadog" "Datadog" "$DATADOG_PASSWORD" "administrator"
