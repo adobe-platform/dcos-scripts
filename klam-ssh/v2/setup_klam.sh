@@ -252,7 +252,7 @@ HostbasedAuthentication no
 LogLevel INFO
 PermitUserEnvironment no
 DenyUsers root
-AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print $0 }') ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F     "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(if [ "$NODE_TYPE" == "public" ]; then echo GRP-ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_UTILITY_USERS ;fi)
+AllowGroups core ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN $(echo $IAM_GROUP_NAME |awk '{ print $0 }') ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F     "-" '{print toupper($5)}')_POWER_USER ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_ROLE_ADMIN GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLENAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER $(if [ "$NODE_TYPE" == "public" ]; then echo GRP-ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_UTILITY_USERS ;fi)
 EOT
 mv -f sshd_config /etc/ssh/sshd_config
 chmod 600 /etc/ssh/sshd_config
@@ -291,6 +291,13 @@ cat << EOT > ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($
 %ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER ALL=(ALL) NOPASSWD: ALL
 EOT
 mv -f ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER /etc/sudoers.d/
+
+if [ "$NODE_TYPE" == "worker" ]; then 
+cat << EOT > GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER
+%GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER ALL=(ALL) NOPASSWD: ALL
+EOT
+mv -f GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER /etc/sudoers.d/
+fi
 
 # Validate /etc/passwd to ensure all groups exist in /etc/group as well
 for i in $(cut -s -d: -f4 /etc/passwd | sort -u );do 
