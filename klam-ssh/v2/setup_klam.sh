@@ -293,10 +293,10 @@ EOT
 mv -f ADOBE_PLATFORM_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_POWER_USER /etc/sudoers.d/
 
 if [ "$NODE_TYPE" == "worker" ]; then 
-  cat << EOT > GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER
-  %GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER ALL=(ALL) NOPASSWD: ALL
-  EOT
-  mv -f GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER /etc/sudoers.d/
+cat << EOT > GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER
+%GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER ALL=(ALL) NOPASSWD: ALL
+EOT
+mv -f GRP-ADOBE_PLATFORM_AWS_$(echo "${ROLE_NAME}" | awk -F "-" '{print toupper($5)}')_BOOSTER /etc/sudoers.d/
 fi
 
 # Validate /etc/passwd to ensure all groups exist in /etc/group as well
